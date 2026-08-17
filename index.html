@@ -1,222 +1,272 @@
-<!DOCTYPE html><html lang="ja"><head>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- スマホ対応：ビューポートの設定 -->
-    <title>Ice & Ember: 14 Days Chronicle - Sovereign Perfection</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ice & Ember: 14 Days Chronicle</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Shippori+Mincho:wght@400;700&family=Yomogi&display=swap');
+        /* フォント整理: 汎用的な明朝体(Shippori Mincho)と、付箋用の手書き風(Yomogi)のみに絞る */
+        @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500&family=Yomogi&display=swap');
         
         :root { 
-            /* 全体的に淡く、パステル調の色合いに変更 */
-            --ice: #bae6fd; 
-            --ember: #fdba74; 
-            --bg: #f8fafc; /* 背景を白系に */
-            --gold: #fde047; 
-            --parchment: #fffbeb; 
-            --dusk-start: #f1f5f9; /* 空も明るく */
-            --dusk-end: #e2e8f0;
-            --note-default: #e0f2fe; 
-            --text-main: #334155; /* テキスト色を濃いグレーに（視認性確保） */
+            --bg-dark: #121212;     /* 全体背景 */
+            --bg-panel: rgba(18, 18, 18, 0.85); /* 半透明パネル */
+            --paper: #f4f1ea;       /* 日誌の色：白すぎないアイボリー */
+            --text-main: #e0e0e0;   /* ベースの文字色 */
+            --text-paper: #2c2c2c;  /* 紙の上の文字色 */
+            --border-subtle: #333333;
+            
+            /* 付箋の色：通常時は淡い水色。Collectionでは各属性の色 */
+            --note-base: #e6f2f5;
+            --note-prank: #d9edf8;
+            --note-care: #e2f0d9;
+            --note-self: #f8e1e1;
+            --note-magic: #ede4f5;
+            --note-gold: #fcf4cb;
         }
         
-        body { margin: 0; background: var(--bg); color: var(--text-main); font-family: 'Shippori Mincho', serif; overflow-y: auto; user-select: none; }
-        #sky { position: fixed; inset: 0; z-index: -1; background: linear-gradient(180deg, var(--dusk-start), var(--dusk-end)); transition: 4s; }
-        
-        #badge-case { position: fixed; top: 15px; right: 15px; display: flex; gap: 10px; background: rgba(255,255,255,0.7); backdrop-filter: blur(5px); padding: 12px; border-radius: 20px; z-index: 500; border: 1.5px dashed #cbd5e1; }
-        .badge-slot { width: 38px; height: 38px; border: 1px solid #cbd5e1; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; color: #94a3b8; transition: 0.5s; background: #fff;}
-        .badge-slot.earned { border-color: var(--gold); background: rgba(253, 224, 71, 0.2); transform: scale(1.1); box-shadow: 0 0 15px rgba(253, 224, 71, 0.5); color: #333;}
+        body { 
+            margin: 0; 
+            background: var(--bg-dark); 
+            color: var(--text-main); 
+            font-family: 'Shippori Mincho', serif; /* 全体的に端正な明朝体に統一 */
+            overflow-y: auto; 
+            user-select: none; 
+            letter-spacing: 0.05em;
+        }
 
+        /* 背景のアニメーションやグラデーションを削除し、静かな単色（またはCSSグラデなし）に */
+        #sky { position: fixed; inset: 0; z-index: -1; background: var(--bg-dark); }
+        
+        /* 画面の基本レイアウト */
         .screen { 
             position: absolute; top: 0; left: 0; width: 100%; min-height: 100vh; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            z-index: 100; text-align: center; padding: 20px 0; /* スマホ向けに余白調整 */
-            box-sizing: border-box; 
+            z-index: 100; padding: 40px 20px; box-sizing: border-box; 
         }
-        #intro { background: transparent; z-index: 1000; }
-        #game { display: none; background: transparent; }
+        #intro { z-index: 1000; }
+        #game { display: none; }
 
-        #day-overlay { position: fixed; inset: 0; background: #fff; z-index: 5000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.8s; }
+        /* DAY切り替え：フェードを短くし、デザインをシンプルに */
+        #day-overlay { position: fixed; inset: 0; background: var(--bg-dark); z-index: 5000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         #day-overlay.active { opacity: 1; pointer-events: auto; }
-        #day-overlay-text { font-family: 'Cinzel'; font-size: 3rem; color: #94a3b8; letter-spacing: 10px; text-shadow: 0 0 20px rgba(148, 163, 184, 0.3); } /* スマホ向けにサイズ縮小 */
+        #day-overlay-text { font-family: 'Shippori Mincho', serif; font-size: 1.5rem; color: #888; letter-spacing: 0.2em; font-weight: normal; }
 
-        /* 机のデザインも明るく */
-        .desk { width: 95%; max-width: 900px; height: 60vh; min-height: 400px; background: #fdf8f6; border: 8px solid #e2e8f0; border-radius: 15px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.1); cursor: pointer; display: flex; flex-direction: column; overflow: hidden; }
-        .paper { flex: 1; margin: 15px; background: var(--parchment); color: var(--text-main); padding: 30px 20px; position: relative; overflow-y: auto; border-radius: 10px; box-shadow: inset 0 0 20px rgba(0,0,0,0.05); } /* スマホ向けに余白調整 */
+        /* 机と紙（日誌）：過剰なUI感をなくし、「一枚の記録」に見せる */
+        .desk { 
+            width: 100%; max-width: 700px; /* 少し細身に */
+            background: transparent; /* 机というハコを消す */
+            border: none; box-shadow: none; 
+            position: relative; display: flex; flex-direction: column; 
+        }
+        .paper { 
+            flex: 1; 
+            background: var(--paper); 
+            color: var(--text-paper); 
+            padding: 40px 50px; 
+            position: relative; 
+            border-radius: 2px; /* 角丸をほぼ無くす */
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3); /* 自然で弱い影 */
+            border: 1px solid #dcdcdc; /* 非常に薄い枠線 */
+        }
         
-        #text-box { font-size: 1rem; line-height: 2.2; text-align: left; min-height: 180px; white-space: pre-wrap; }
-        #click-prompt { position: absolute; bottom: 20px; right: 20px; font-size: 0.85rem; color: #94a3b8; animation: blink 1.5s infinite; visibility: hidden; }
-        @keyframes blink { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
+        #text-box { font-size: 1.1rem; line-height: 2.2; text-align: left; min-height: 200px; white-space: pre-wrap; }
+        
+        /* CLICKの点滅を控えめに */
+        #click-prompt { 
+            position: absolute; bottom: 20px; right: 40px; 
+            font-size: 1rem; color: #aaa; 
+            animation: gentle-fade 2s infinite; 
+            visibility: hidden; 
+            font-family: sans-serif;
+        }
+        @keyframes gentle-fade { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.8; } }
 
-        /* パネルも明るく */
-        .ui-panel { position: fixed; inset: 0; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(5px); z-index: 4000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        /* 選択肢（付箋）出現時のコンテナ：空間の連続性を高める */
+        .ui-panel { 
+            position: fixed; inset: 0; 
+            background: var(--bg-panel); /* 背景を少し透過させて紙面を感じさせる */
+            z-index: 4000; display: none; flex-direction: column; align-items: center; justify-content: center; 
+            padding: 20px;
+        }
         
+        #ui-msg { margin-bottom: 40px; font-size: 1.1rem; color: #aaa; font-weight: normal; }
+
         .choices { 
             display: grid; 
             grid-template-columns: repeat(2, 1fr); 
-            gap: 15px; /* スマホ向けに隙間を狭く */
+            gap: 20px; 
             justify-items: center;
-            width: 100%;
-            max-width: 600px; 
-            margin: 0 auto;
+            width: 100%; max-width: 600px; 
         }
         
+        /* 通常ボタン：透明背景、細い線、角丸なし、アニメーション排除 */
         .btn { 
-            background: #fff; border: 2px solid var(--ice); color: var(--text-main); 
-            padding: 15px 0; cursor: pointer; transition: 0.3s; 
-            font-family: 'Shippori Mincho', serif; font-size: 1rem; width: 100%; max-width: 280px; 
-            border-radius: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            text-align: center;
+            background: transparent; border: 1px solid var(--border-subtle); color: var(--text-main); 
+            padding: 12px 0; cursor: pointer; transition: background 0.2s, border-color 0.2s; 
+            font-family: 'Shippori Mincho', serif; font-size: 1rem; width: 100%; max-width: 240px; 
+            border-radius: 0; box-shadow: none; text-align: center; letter-spacing: 0.1em;
         }
-        .btn:hover { transform: translateY(-3px); background: var(--ice); box-shadow: 0 8px 15px rgba(186, 230, 253, 0.4); color: #000; }
+        .btn:hover { background: rgba(255,255,255,0.05); border-color: #666; }
         
+        /* 選択肢の付箋：このゲームの主役。わずかに傾け、自然な影と色を持たせる */
         .sticky-note {
-            width: 100%; max-width: 180px; aspect-ratio: 1 / 1; /* 正方形を維持しつつレスポンシブに */
+            width: 100%; max-width: 180px; aspect-ratio: 1 / 1; 
             height: auto;
-            padding: 15px;
-            box-sizing: border-box;
-            font-family: 'Yomogi', cursive;
-            font-size: 1rem;
-            line-height: 1.4;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
+            padding: 15px; box-sizing: border-box;
+            font-family: 'Yomogi', cursive; /* 付箋だけは手書き感を残す */
+            font-size: 1rem; line-height: 1.6;
+            display: flex; align-items: center; justify-content: center; text-align: center;
             cursor: pointer;
-            border-radius: 5px;
-            box-shadow: 3px 3px 8px rgba(0,0,0,0.1);
-            border: 1px solid #e0f2fe;
-            transition: 0.3s;
-            position: relative;
-            transform: rotate(-1deg);
-            background-color: var(--note-default); 
-            color: var(--text-main);
+            border-radius: 0; /* 角丸なし */
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.2); /* 自然な影 */
+            border: none;
+            transition: transform 0.15s ease-out; /* ホバーアニメーションを短く鋭く */
+            background-color: var(--note-base); 
+            color: #333;
+            transform: rotate(-1deg); /* わずかな傾き */
+            opacity: 0; /* 出現アニメーション用 */
+            animation: note-appear 0.4s forwards ease-out;
         }
-        .sticky-note:nth-child(even) { transform: rotate(1.5deg); }
-        .sticky-note:hover { transform: scale(1.05) rotate(0deg); z-index: 10; box-shadow: 5px 5px 15px rgba(0,0,0,0.15); }
+        .sticky-note:nth-child(even) { transform: rotate(1deg); }
+        .sticky-note:hover { transform: scale(1.02) rotate(0deg); box-shadow: 2px 6px 12px rgba(0,0,0,0.3); }
+
+        /* 付箋が「置かれる」ような出現アニメーション */
+        @keyframes note-appear {
+            0% { opacity: 0; transform: translateY(-5px) rotate(0deg); }
+            100% { opacity: 1; }
+        }
+        /* 付箋の出現タイミングをずらす */
+        .sticky-note:nth-child(1) { animation-delay: 0.1s; }
+        .sticky-note:nth-child(2) { animation-delay: 0.2s; }
+        .sticky-note:nth-child(3) { animation-delay: 0.3s; }
+        .sticky-note:nth-child(4) { animation-delay: 0.4s; }
         
+        /* 黄金の付箋 */
         .sticky-note.gold-choice {
             grid-column: 1 / -1;
-            width: 100%; max-width: 400px; aspect-ratio: auto; height: 100px;
-            background: linear-gradient(135deg, #fef08a, #fde047) !important;
-            color: #333 !important;
-            border: 1px solid #fde047;
-            font-weight: bold;
-            font-size: 1.1rem;
-            transform: rotate(0deg);
+            width: 100%; max-width: 380px; aspect-ratio: auto; height: 100px;
+            background-color: var(--note-gold) !important;
+            border: 1px solid #d4af37;
+            font-family: 'Shippori Mincho', serif; /* 黄金は真面目なフォントに */
         }
 
+        /* Collection & Extra 画面 */
         #collection, #extra { 
-            background: #f8fafc; 
-            overflow-y: auto; padding: 60px 15px; z-index: 6000; display: none; 
-            flex-direction: column; align-items: center; justify-content: flex-start;
+            background: var(--bg-dark); overflow-y: auto; padding: 60px 20px 100px 20px; 
+            z-index: 6000; display: none; flex-direction: column; align-items: flex-start; /* 左寄せベース */
+            max-width: 800px; margin: 0 auto; width: 100%;
         }
         
-        .content-box { width: 100%; max-width: 800px; text-align: left; background: #fff; padding: 25px; border-radius: 15px; line-height: 1.8; border: 1px solid #e2e8f0; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); box-sizing: border-box;}
-        .content-box h3 { color: #64748b; font-family: 'Cinzel'; border-bottom: 2px dashed #cbd5e1; padding-bottom: 8px; font-size: 1.2rem;}
+        h2 { font-weight: normal; font-size: 1.5rem; letter-spacing: 0.1em; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; width: 100%; text-align: left; margin-top: 0;}
+        .sub-text { font-size: 0.9rem; color: #888; margin-bottom: 30px; text-align: left; width: 100%;}
 
-        .coll-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; width: 100%; max-width: 1100px; margin-top: 30px; } /* スマホ向けにサイズ縮小 */
-        .coll-note { height: 160px; position: relative; cursor: pointer; transition: transform 0.6s; transform-style: preserve-3d; }
+        .content-box { width: 100%; text-align: left; line-height: 1.8; margin-bottom: 40px; font-size: 0.95rem; color: #ccc;}
+        .content-box h3 { font-weight: normal; font-size: 1.1rem; color: #eee; margin-top: 30px; border-bottom: 1px dashed var(--border-subtle); padding-bottom: 5px;}
+
+        /* コレクションのグリッド（付箋表示） */
+        .coll-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; width: 100%; margin-top: 20px; }
+        .coll-note { height: 160px; position: relative; cursor: pointer; transition: transform 0.4s; transform-style: preserve-3d; }
         .coll-note.flipped { transform: rotateY(180deg); }
-        .coll-note-front, .coll-note-back { position: absolute; inset: 0; padding: 15px; backface-visibility: hidden; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: left; }
-        .coll-note-front { font-family: 'Yomogi', cursive; font-size: 1rem; color: #333; }
-        .coll-note-back { transform: rotateY(180deg); background: #fff !important; color: var(--text-main); border: 2px solid var(--ice); font-family: 'Shippori Mincho', serif; font-size: 0.9rem; }
-
-        /* --- スマホ向けメディアクエリ --- */
-        @media (max-width: 600px) {
-            #intro img { width: 95%; }
-            #intro p { font-size: 1rem; line-height: 1.8; margin-bottom: 30px; padding: 0 10px;}
-            
-            #badge-case { top: auto; bottom: 10px; right: 10px; padding: 8px; gap: 5px; border-radius: 15px;}
-            .badge-slot { width: 30px; height: 30px; font-size: 0.8rem;}
-
-            #day-label { font-size: 2rem; margin-bottom: 10px;}
-            
-            .ui-panel { padding: 15px; }
-            #ui-msg { font-size: 1.2rem; margin-bottom: 20px;}
-            
-            .choices { grid-template-columns: 1fr 1fr; gap: 10px; }
-            .sticky-note { padding: 10px; font-size: 0.9rem; }
-            
-            h2 { font-size: 2.5rem !important; }
+        .coll-note-front, .coll-note-back { 
+            position: absolute; inset: 0; padding: 15px; backface-visibility: hidden; 
+            border-radius: 0; display: flex; flex-direction: column; justify-content: space-between; 
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.3); text-align: left; 
         }
-    </style></head>
+        .coll-note-front { font-family: 'Yomogi', cursive; font-size: 1rem; color: #333; }
+        .coll-note-back { transform: rotateY(180deg); background: #222 !important; color: #eee; font-family: 'Shippori Mincho', serif; font-size: 0.9rem; border: 1px solid #444;}
+
+        /* スマホ対応 */
+        @media (max-width: 600px) {
+            .paper { padding: 30px 20px; margin: 10px; }
+            .choices { grid-template-columns: 1fr 1fr; gap: 15px; }
+            .sticky-note { padding: 10px; font-size: 0.9rem; }
+            #intro img { width: 90%; }
+        }
+    </style>
+</head>
 <body>
     <script src="scenarios.js"></script>
 
-    <div id="day-overlay"><div id="day-overlay-text">PROLOGUE</div></div><div id="sky"></div>
+    <div id="day-overlay"><div id="day-overlay-text"></div></div>
+    <div id="sky"></div>
     
-    <div id="badge-case">
-        <div id="b-prank" class="badge-slot" title="かわいらしい悪戯">🐱</div>
-        <div id="b-care" class="badge-slot" title="気遣い">🍵</div>
-        <div id="b-self" class="badge-slot" title="本心">💌</div>
-        <div id="b-magic" class="badge-slot" title="魔力共鳴">🎶</div>
-        <div id="b-war" class="badge-slot" title="宿敵">🔥</div>
-        <div id="b-true_love" class="badge-slot" title="黄金の誓い">👑</div>
-        <div id="b-grand" class="badge-slot" title="真実の融和">🕊️</div>
-    </div>
-
     <div id="intro" class="screen">
-        <!-- ロゴ画像がない場合の代替テキストの色も調整 -->
-        <img src="title.png" alt="Ice & Ember" style="max-width: 800px; width: 90%; margin-bottom: 30px; filter: drop-shadow(0 0 20px rgba(186, 230, 253, 0.6)); color: var(--text-main);">
-        <p style="max-width: 700px; width: 90%; line-height: 2.2; font-size: 1.1rem; margin-bottom: 40px; color: #64748b; letter-spacing: 1px;">
+        <img src="title.png" alt="Ice & Ember" style="max-width: 600px; margin-bottom: 40px; opacity: 0.9;">
+        <p style="max-width: 600px; line-height: 2; font-size: 0.95rem; margin-bottom: 50px; color: #aaa;">
             中欧の峻厳たる山嶺。古き石造りの書庫で綴られる、<br>二人の騎士による、すれ違いと共犯の14日間。
         </p>
         <div style="display:flex; flex-direction: column; gap:15px; align-items: center; width: 100%;">
-            <button class="btn" onclick="initAudio(); startPrologue();">物語を始める</button>
-            <button class="btn" onclick="openCollection();">秘密の引き出し</button>
-            <button class="btn" onclick="openExtra();">そのほか</button>
+            <button class="btn" onclick="initAudio(); startPrologue();">BEGIN</button>
+            <button class="btn" onclick="openCollection();">COLLECTION</button>
+            <button class="btn" onclick="openExtra();">INFORMATION</button>
         </div>
     </div>
 
     <div id="game" class="screen">
-        <div id="day-label" style="font-family:'Cinzel'; font-size: 2.5rem; color: #64748b; margin-bottom: 15px; text-shadow: 1px 1px 2px #fff;">DAY 1</div>
+        <div id="day-label" style="font-size: 1.1rem; color: #888; margin-bottom: 10px; letter-spacing: 0.1em;">DAY 1</div>
         <div class="desk" id="desk-trigger">
             <div class="paper">
                 <div id="text-box"></div>
-                <div id="click-prompt">▼ CLICK</div>
+                <div id="click-prompt">continue ›</div>
             </div>
         </div>
         
         <div class="ui-panel" id="ui-panel">
-            <div id="ui-msg" style="margin-bottom:25px; font-size:1.3rem; color:#64748b; font-family:'Shippori Mincho';">痕跡を、何色に染めようか。</div>
+            <div id="ui-msg">痕跡を残す</div>
             <div id="choice-area" class="choices"></div>
         </div>
     </div>
 
     <div id="collection" class="screen">
-        <h2 style="font-family:'Cinzel'; color:#cbd5e1; font-size: 3rem; margin-top: 0; margin-bottom: 10px;">Collection</h2>
-        <p style="color: #94a3b8; font-size: 1rem; margin-bottom: 20px;">引き出しの奥。あいつが隠しきれなかった反応の記録。</p>
+        <h2>COLLECTION</h2>
+        <div class="sub-text">付箋をクリックして裏返すと、記録された反応を確認できます。</div>
+        
+        <!-- 本編では非表示にし、コレクション画面でのみバッジ（実績）をシンプルに表示 -->
+        <div style="display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; font-size: 0.9rem; color: #888;">
+            <span id="b-care" style="opacity:0.3;">Ⅰ 気遣い</span>
+            <span id="b-self" style="opacity:0.3;">Ⅱ 本心</span>
+            <span id="b-magic" style="opacity:0.3;">Ⅲ 共鳴</span>
+            <span id="b-prank" style="opacity:0.3;">Ⅳ 悪戯</span>
+            <span id="b-war" style="opacity:0.3;">Ⅴ 宿敵</span>
+            <span id="b-true_love" style="opacity:0.3;">Ⅵ 黄金</span>
+            <span id="b-grand" style="opacity:0.3;">Ⅶ 真実</span>
+        </div>
+
         <div id="coll-grid" class="coll-grid"></div>
-        <div id="hint-box"></div>
-        <div style="display:flex; flex-direction: column; gap:15px; margin-top:40px; padding-bottom: 50px; width: 100%; align-items: center;">
-            <button class="btn" onclick="closeCollection();">戻る</button>
-            <button class="btn" onclick="location.reload();">最初からプレイ</button>
+        <div id="hint-box" style="margin-top: 40px; font-size: 0.9rem; color: #888; border-top: 1px dashed #444; padding-top: 20px; width: 100%;"></div>
+        
+        <div style="display:flex; gap:15px; margin-top:50px; width: 100%;">
+            <button class="btn" onclick="closeCollection();" style="max-width: 150px;">BACK</button>
         </div>
     </div>
 
     <div id="extra" class="screen">
-        <h2 style="font-family:'Cinzel'; color:#cbd5e1; font-size: 3rem; margin-bottom: 20px;">Information</h2>
+        <h2>INFORMATION</h2>
         <div class="content-box">
             <h3>Credits</h3>
             <p>企画・制作：[貴公のお名前]<br>シナリオ：[執筆担当名]<br>システム：Gemini Library & Sovereign Perfection System</p>
             <h3>Feedback</h3>
             <p>物語の感想をお待ちしております。<br>（ここにフォームのリンクなどを記載してください）</p>
-            <h3>Trivia / 小ネタ</h3>
-            <p>・書庫の温度は、パーシヴァルの魔力によって常に「古書に最適な温度」へ調整されている。<br>・付箋の裏に書かれた文字は、特別な火（または情熱）で炙らなければ浮かび上がらない。</p>
+            <h3>Trivia</h3>
+            <p>書庫の温度は、パーシヴァルの魔力によって常に「古書に最適な温度」へ調整されている。<br>付箋の裏に書かれた文字は、特別な火（または情熱）で炙らなければ浮かび上がらない。</p>
         </div>
-        <button class="btn" onclick="closeExtra();">入り口に戻る</button>
+        <button class="btn" onclick="closeExtra();" style="max-width: 150px;">BACK</button>
     </div>
 
 <script>
     let audioCtx;
     function initAudio() { if(!audioCtx) audioCtx = new (AudioContext || webkitAudioContext)(); }
+    
+    // SEを少し控えめな紙の音に調整（オシレーターの設定変更）
     function playPageSound() {
         if(!audioCtx) return;
-        const gain = audioCtx.createGain(); gain.gain.value = 0.05;
-        const osc = audioCtx.createOscillator(); osc.type = 'triangle';
-        osc.frequency.setValueAtTime(120, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.1);
+        const gain = audioCtx.createGain(); gain.gain.value = 0.02;
+        const osc = audioCtx.createOscillator(); osc.type = 'sine';
+        osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
         osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.05);
     }
 
     let day = 0;
@@ -244,9 +294,12 @@
         choiceMade = false;
         document.getElementById('ui-panel').style.display = 'none';
         document.getElementById('text-box').innerHTML = "";
-        document.getElementById('day-label').innerText = day === 0 ? "PROLOGUE" : "DAY " + day;
+        
+        // DAY表示を控えめに
+        const dayStr = day === 0 ? "PROLOGUE" : `DAY ${String(day).padStart(2, '0')}`;
+        document.getElementById('day-label').innerText = dayStr;
 
-        showDayOverlay(day, () => {
+        showDayOverlay(dayStr, () => {
             if (day === 8 && (scores.magic === 7)) isPrankWar = true;
             const data = (isPrankWar && day >= 8) ? warScenarios[day] : scenarios[day];
             let trace = (day <= 7) ? "日誌が静かに置かれている" : "色とりどりの付箋が机を飾っている";
@@ -259,11 +312,12 @@
         });
     }
 
-    function showDayOverlay(target, cb) {
+    function showDayOverlay(text, cb) {
         const ov = document.getElementById('day-overlay');
-        document.getElementById('day-overlay-text').innerText = (target === 0 ? "PROLOGUE" : "DAY " + target);
+        document.getElementById('day-overlay-text').innerText = text;
         ov.classList.add('active');
-        setTimeout(() => { ov.classList.remove('active'); if(cb) cb(); }, 1600);
+        // フェード演出を短縮（表示0.6秒程度に）
+        setTimeout(() => { ov.classList.remove('active'); if(cb) cb(); }, 600);
     }
 
     async function advance() {
@@ -288,7 +342,8 @@
         for (let char of line) {
             if (skipRequested) { box.innerHTML = line; break; }
             box.innerHTML += char;
-            await new Promise(r => setTimeout(r, 40));
+            // 文字送りを高速化 (40ms -> 15ms)
+            await new Promise(r => setTimeout(r, 15));
         }
         isTyping = false; skipRequested = false;
     }
@@ -313,13 +368,12 @@
         opts.forEach(o => {
             const b = document.createElement('button');
             if (day === 0) {
+                // プロローグは通常の選択肢
                 b.className = 'btn';
                 b.style.gridColumn = "1 / -1"; 
             } else {
+                // 1日目以降は付箋スタイル。色は統一（黄金以外）
                 b.className = 'sticky-note' + (o.c === 'true' || o.c === 'grand' ? ' gold-choice' : '');
-                if (o.c !== 'true' && o.c !== 'grand') {
-                    b.style.backgroundColor = 'var(--note-default)';
-                }
             }
             b.innerText = o.t;
             b.onclick = (e) => { e.stopPropagation(); selectChoice(o); };
@@ -341,8 +395,8 @@
             if (day <= 14) render();
             else {
                 document.getElementById('ui-panel').style.display = 'flex';
-                document.getElementById('ui-msg').innerText = "全ての記録が幕を下ろした。";
-                document.getElementById('choice-area').innerHTML = '<button class="btn" style="background:#fde047; border-color:#fde047; font-weight:bold;" onclick="prepareEpilogue()">エンディングを見届ける</button>';
+                document.getElementById('ui-msg').innerText = "記録の終端。";
+                document.getElementById('choice-area').innerHTML = '<button class="btn" style="border-color:#d4af37; color:#d4af37;" onclick="prepareEpilogue()">エンディングへ</button>';
             }
         }, 150);
     }
@@ -379,10 +433,10 @@
     function showFinalButtons() {
         saveRun(currentEndingID);
         document.getElementById('ui-panel').style.display = 'flex';
-        document.getElementById('ui-msg').innerText = "物語は幕を閉じました。";
+        document.getElementById('ui-msg').innerText = "End of Chronicle";
         document.getElementById('choice-area').innerHTML = `
-            <button class="btn" onclick="openCollection()">秘密の引き出しへ</button>
-            <button class="btn" onclick="location.reload()">もう一度プレイ</button>
+            <button class="btn" onclick="openCollection()">COLLECTION</button>
+            <button class="btn" onclick="location.reload()">REPLAY</button>
         `;
     }
 
@@ -397,57 +451,77 @@
         currentRunNotes.forEach(n => { if (!all.some(x => x.t === n.t)) all.push(n); });
         localStorage.setItem('lib_vFinal_S', JSON.stringify(all));
         const b = JSON.parse(localStorage.getItem('badge_vFinal_S') || '{}');
-        if (eid === "grand_finale") b.grand = true;
+        if (eid === "grand_finale" || eid === "grand") b.grand = true;
         else b[eid] = true;
         localStorage.setItem('badge_vFinal_S', JSON.stringify(b));
     }
 
     function openCollection() { 
         document.getElementById('intro').style.display = 'none';
+        document.getElementById('game').style.display = 'none';
         document.getElementById('collection').style.display = 'flex';
         showCollection();
     }
-    function closeCollection() { document.getElementById('collection').style.display = 'none'; document.getElementById('intro').style.display = 'flex'; }
+    function closeCollection() { 
+        document.getElementById('collection').style.display = 'none'; 
+        // ゲーム終了後ならタイトルへ、プレイ前ならタイトルへ戻す
+        if(day > 14) { location.reload(); }
+        else { document.getElementById('intro').style.display = 'flex'; }
+    }
     function openExtra() { document.getElementById('intro').style.display = 'none'; document.getElementById('extra').style.display = 'flex'; }
     function closeExtra() { document.getElementById('extra').style.display = 'none'; document.getElementById('intro').style.display = 'flex'; }
 
     function showCollection() {
         const grid = document.getElementById('coll-grid'); grid.innerHTML = '';
         const all = JSON.parse(localStorage.getItem('lib_vFinal_S') || "[]");
-        if (all.length === 0) grid.innerHTML = '<div style="grid-column: 1/-1; padding: 50px; font-family: Yomogi;">まだ、引き出しは空っぽだ。</div>';
+        if (all.length === 0) grid.innerHTML = '<div style="grid-column: 1/-1; padding: 20px; color: #666;">記録がありません。</div>';
         else {
-            all.sort((a,b) => a.d - b.d).forEach(n => {
+            all.sort((a,b) => a.d - b.d).forEach((n, idx) => {
                 const note = document.createElement('div');
                 note.className = 'coll-note';
-                // コレクション画面の付箋の色も淡く変更
-                const bg = n.c==='prank'?'#bae6fd':n.c==='care'?'#bbf7d0':n.c==='self'?'#fecaca':n.c==='magic'?'#e9d5ff':'#fef08a';
-                note.innerHTML = `<div class="coll-note-front" style="background:${bg}"><div style="font-size:0.9rem; opacity:0.8;">DAY ${n.d}</div><div style="font-size:1.2rem; margin-top:10px;">${n.t}</div></div><div class="coll-note-back"><div style="font-size:0.8rem; color:#94a3b8; border-bottom:1px dashed #cbd5e1; padding-bottom:5px;">Percival's Reaction</div><div style="flex:1; display:flex; align-items:center; justify-content:center; padding:10px; font-style:italic;">${n.r}</div></div>`;
+                
+                // コレクションでは属性ごとの色を表示（少し彩度を抑えたパステル）
+                const bg = n.c==='prank'?'var(--note-prank)':n.c==='care'?'var(--note-care)':n.c==='self'?'var(--note-self)':n.c==='magic'?'var(--note-magic)':'var(--note-gold)';
+                
+                note.innerHTML = `
+                    <div class="coll-note-front" style="background:${bg}">
+                        <div style="font-size:0.8rem; color:#666;">DAY ${String(n.d).padStart(2, '0')}</div>
+                        <div style="font-size:1.1rem; margin-top:8px;">${n.t}</div>
+                    </div>
+                    <div class="coll-note-back">
+                        <div style="flex:1; display:flex; align-items:center; justify-content:center; padding:10px;">${n.r}</div>
+                    </div>
+                `;
+                // 遅延アニメーション
+                note.style.animation = `note-appear 0.4s forwards ${idx * 0.05}s`;
+                note.style.opacity = 0;
+                
                 note.onclick = () => { playPageSound(); note.classList.toggle('flipped'); };
                 grid.appendChild(note);
             });
         }
+        
+        // バッジの表示更新（色を付ける）
         const b = JSON.parse(localStorage.getItem('badge_vFinal_S') || '{}');
-        const h = [];
-        if(!b.prank) h.push("🐱 【悪戯】かわいらしい交流。");
-        if(!b.care) h.push("🍵 【気遣い】琥珀色のお茶の温もり。");
-        if(!b.self) h.push("💌 【本心】白紙の付箋に込めた告白。");
-        if(!b.magic) h.push("🎶 【魔力】重なり合う旋律。");
-        if(!b.war) h.push("🔥 【宿敵】魔力戦のみを選び、道を拓け。");
-        if(!b.true_love) h.push("👑 【黄金】特別な品を贈り、深い誓いを。");
-        if(getSeenBadgeCount() >= 6 && !b.grand) h.push("🕊️ 【真実】全ての記憶を巡った時、真実の扉が開く。");
-        document.getElementById('hint-box').innerHTML = "<div style='font-family:Yomogi; background:#fff; padding:20px; border-radius:10px; margin-top:30px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;'><strong style='color:#64748b;'>【未踏の記憶への予言】</strong><br>" + (h.join("<br>") || "全ての記憶を収集した。貴公こそがこの書庫の正史だ。") + "</div>";
-        updateBadges();
-    }
-
-    function isAllBadgesEarned() { 
-        const b = JSON.parse(localStorage.getItem('badge_vFinal_S') || '{}');
-        return b.prank && b.care && b.self && b.magic && b.true_love;
-    }
-
-    function updateBadges() { 
-        const b = JSON.parse(localStorage.getItem('badge_vFinal_S') || '{}'); 
         const mapping = {prank:'b-prank', care:'b-care', self:'b-self', magic:'b-magic', war:'b-war', true_love:'b-true_love', grand:'b-grand'};
-        for(let key in mapping) if(b[key]) document.getElementById(mapping[key]).classList.add('earned');
+        for(let key in mapping) {
+            if(b[key] || (key==='grand' && b.grand_finale)) {
+                document.getElementById(mapping[key]).style.opacity = '1';
+                document.getElementById(mapping[key]).style.color = '#d4af37';
+            }
+        }
+
+        const h = [];
+        if(!b.care) h.push("未踏：気遣い");
+        if(!b.self) h.push("未踏：本心");
+        if(!b.magic) h.push("未踏：共鳴");
+        if(!b.prank) h.push("未踏：悪戯");
+        if(!b.war) h.push("未踏：宿敵（魔力のみで貫く）");
+        if(!b.true_love) h.push("未踏：黄金（特別な誓い）");
+        if(getSeenBadgeCount() >= 6 && (!b.grand && !b.grand_finale)) h.push("未踏：真実（全てを巡った果てに）");
+        
+        document.getElementById('hint-box').innerHTML = (h.length > 0) ? h.join(" / ") : "全ての記憶を収集した。";
     }
-    updateBadges();
-</script></body></html>
+</script>
+</body>
+</html>
