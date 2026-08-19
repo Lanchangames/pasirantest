@@ -21,7 +21,7 @@
             --note-prank: #d9edf8;
             --note-care: #e2f0d9;
             --note-self: #f8e1e1;
-            --note-rival: #ede4f5;  /* 旧magicの色をそのままrivalへ継承 */
+            --note-rival: #ede4f5;  
             --note-gold: #fcf4cb;
         }
         
@@ -29,13 +29,12 @@
             margin: 0; 
             background: var(--bg-dark); 
             color: var(--text-main); 
-            font-family: 'Shippori Mincho', serif; /* 全体的に端正な明朝体に統一 */
+            font-family: 'Shippori Mincho', serif; 
             overflow-y: auto; 
             user-select: none; 
             letter-spacing: 0.05em;
         }
 
-        /* 背景のアニメーションやグラデーションを削除し、静かな単色（またはCSSグラデなし）に */
         #sky { position: fixed; inset: 0; z-index: -1; background: var(--bg-dark); }
         
         /* 画面の基本レイアウト */
@@ -47,37 +46,43 @@
         #intro { z-index: 1000; }
         #game { display: none; }
 
+        /* タイトル画面要素のPCベース設定 */
+        #intro img { max-width: 600px; margin-bottom: 40px; opacity: 0.9; }
+        #intro p { max-width: 600px; line-height: 2; font-size: 0.95rem; margin-bottom: 50px; color: #aaa; }
+
         /* DAY切り替え：フェードを短くし、デザインをシンプルに */
         #day-overlay { position: fixed; inset: 0; background: var(--bg-dark); z-index: 5000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         #day-overlay.active { opacity: 1; pointer-events: auto; }
         #day-overlay-text { font-family: 'Shippori Mincho', serif; font-size: 1.5rem; color: #888; letter-spacing: 0.2em; font-weight: normal; }
 
+        #day-label {
+            width: 100%; max-width: 700px; text-align: left;
+            font-size: 1.1rem; color: #888; margin-bottom: 10px; letter-spacing: 0.1em;
+        }
+
         /* 机と紙（日誌）：過剰なUI感をなくし、「一枚の記録」に見せる */
         .desk { 
-            width: 100%; max-width: 700px; /* 少し細身に */
-            background: transparent; /* 机というハコを消す */
-            border: none; box-shadow: none; 
+            width: 100%; max-width: 700px; 
+            background: transparent; border: none; box-shadow: none; 
             position: relative; display: flex; flex-direction: column; 
         }
         .paper { 
-            flex: 1; 
+            width: 100%; 
+            height: 420px; /* 文字送りで枠が可変しないように高さを完全固定 */
             background: var(--paper); 
             color: var(--text-paper); 
             padding: 40px 50px; 
             position: relative; 
-            border-radius: 2px; /* 角丸をほぼ無くす */
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3); /* 自然で弱い影 */
-            border: 1px solid #dcdcdc; /* 非常に薄い枠線 */
-            
-            /* 【修正】枠の高さを固定し、可変させない */
-            height: 400px; 
-            overflow-y: hidden; /* 中のテキストが増えてもスクロールさせず、枠の拡張も防ぐ */
+            border-radius: 2px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3); 
+            border: 1px solid #dcdcdc; 
+            box-sizing: border-box;
+            overflow: hidden; /* テキストで広がらないようにする */
         }
         
-        /* 【修正】テキストボックスのサイズを固定し、枠の拡張を防止 */
         #text-box { 
             font-size: 1.1rem; line-height: 2.2; text-align: left; 
-            height: 100%; /* paperの高さいっぱいに広げる */
+            height: 100%; 
             white-space: pre-wrap; 
         }
         
@@ -88,7 +93,7 @@
             animation: gentle-fade 2s infinite; 
             visibility: hidden; 
             font-family: sans-serif;
-            background: var(--paper); /* テキストと被った場合に見やすくする */
+            background: var(--paper); 
             padding-left: 10px;
         }
         @keyframes gentle-fade { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.8; } }
@@ -96,13 +101,13 @@
         /* 選択肢（付箋）出現時のコンテナ：空間の連続性を高める */
         .ui-panel { 
             position: fixed; inset: 0; 
-            background: var(--bg-panel); /* 背景を少し透過させて紙面を感じさせる */
+            background: var(--bg-panel); 
             z-index: 4000; display: none; flex-direction: column; align-items: center; justify-content: center; 
             padding: 20px;
         }
         
-        /* 【修正】プロローグ後の「痕跡を残す」等のメッセージを完全に消すため高さを0に */
-        #ui-msg { margin-bottom: 0; font-size: 0; color: transparent; font-weight: normal; height: 0; overflow: hidden;}
+        /* 「痕跡を残す」等の不要なメッセージを非表示に */
+        #ui-msg { display: none !important; }
 
         .choices { 
             display: grid; 
@@ -121,34 +126,32 @@
         }
         .btn:hover { background: rgba(255,255,255,0.05); border-color: #666; }
         
-        /* 選択肢の付箋：このゲームの主役。わずかに傾け、自然な影と色を持たせる */
+        /* 選択肢の付箋：このゲームの主役 */
         .sticky-note {
             width: 100%; max-width: 180px; aspect-ratio: 1 / 1; 
             height: auto;
             padding: 15px; box-sizing: border-box;
-            font-family: 'Yomogi', cursive; /* 付箋だけは手書き感を残す */
+            font-family: 'Yomogi', cursive; 
             font-size: 1rem; line-height: 1.6;
             display: flex; align-items: center; justify-content: center; text-align: center;
             cursor: pointer;
-            border-radius: 0; /* 角丸なし */
-            box-shadow: 2px 4px 8px rgba(0,0,0,0.2); /* 自然な影 */
+            border-radius: 0; 
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.2); 
             border: none;
-            transition: transform 0.15s ease-out; /* ホバーアニメーションを短く鋭く */
+            transition: transform 0.15s ease-out; 
             background-color: var(--note-base); 
             color: #333;
-            transform: rotate(-1deg); /* わずかな傾き */
-            opacity: 0; /* 出現アニメーション用 */
+            transform: rotate(-1deg); 
+            opacity: 0; 
             animation: note-appear 0.4s forwards ease-out;
         }
         .sticky-note:nth-child(even) { transform: rotate(1deg); }
         .sticky-note:hover { transform: scale(1.02) rotate(0deg); box-shadow: 2px 6px 12px rgba(0,0,0,0.3); }
 
-        /* 付箋が「置かれる」ような出現アニメーション */
         @keyframes note-appear {
             0% { opacity: 0; transform: translateY(-5px) rotate(0deg); }
             100% { opacity: 1; }
         }
-        /* 付箋の出現タイミングをずらす */
         .sticky-note:nth-child(1) { animation-delay: 0.1s; }
         .sticky-note:nth-child(2) { animation-delay: 0.2s; }
         .sticky-note:nth-child(3) { animation-delay: 0.3s; }
@@ -160,13 +163,13 @@
             width: 100%; max-width: 380px; aspect-ratio: auto; height: 100px;
             background-color: var(--note-gold) !important;
             border: 1px solid #d4af37;
-            font-family: 'Shippori Mincho', serif; /* 黄金は真面目なフォントに */
+            font-family: 'Shippori Mincho', serif; 
         }
 
         /* Collection & Extra 画面 */
         #collection, #extra { 
             background: var(--bg-dark); overflow-y: auto; padding: 60px 20px 100px 20px; 
-            z-index: 6000; display: none; flex-direction: column; align-items: flex-start; /* 左寄せベース */
+            z-index: 6000; display: none; flex-direction: column; align-items: flex-start; 
             max-width: 800px; margin: 0 auto; width: 100%;
         }
         
@@ -176,7 +179,7 @@
         .content-box { width: 100%; text-align: left; line-height: 1.8; margin-bottom: 40px; font-size: 0.95rem; color: #ccc;}
         .content-box h3 { font-weight: normal; font-size: 1.1rem; color: #eee; margin-top: 30px; border-bottom: 1px dashed var(--border-subtle); padding-bottom: 5px;}
 
-        /* コレクションのグリッド（付箋表示） */
+        /* コレクションのグリッド */
         .coll-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; width: 100%; margin-top: 20px; }
         .coll-note { height: 160px; position: relative; cursor: pointer; transition: transform 0.4s; transform-style: preserve-3d; }
         .coll-note.flipped { transform: rotateY(180deg); }
@@ -188,24 +191,62 @@
         .coll-note-front { font-family: 'Yomogi', cursive; font-size: 1rem; color: #333; }
         .coll-note-back { transform: rotateY(180deg); background: #222 !important; color: #eee; font-family: 'Shippori Mincho', serif; font-size: 0.9rem; border: 1px solid #444;}
 
-        /* スマホ対応 */
+        /* =========================================
+           スマホ向けレイアウト調整
+           ========================================= */
         @media (max-width: 600px) {
+            .screen { padding: 40px 20px; }
+            
+            /* タイトル画面の余白調整と改行自動化 */
+            #intro { padding: 0 24px; box-sizing: border-box; }
+            #intro img { width: 100%; max-width: 420px; margin-bottom: 16px; }
+            #intro p { font-size: 0.9rem; line-height: 1.9; margin-bottom: 30px; }
+            
+            /* DAY表示を左寄せで日誌と揃え、控えめに */
+            #day-label { 
+                font-size: 0.8rem; 
+                letter-spacing: 0.2em; 
+                width: 100%; text-align: left; 
+                margin-bottom: 8px; 
+            }
+            
+            /* 机と日誌の枠を画面いっぱいに */
+            .desk { width: 100%; }
             .paper { 
-                padding: 20px; /* スマホ向けに余白を減らす */
-                margin: 10px; 
-                height: 350px; /* スマホ向けに固定高さを少し小さく */
+                margin: 0; 
+                height: min(62vh, 520px); 
+                min-height: 400px; 
+                padding: 32px 26px 46px; 
+                box-sizing: border-box; 
             }
-            #text-box {
-                font-size: 0.95rem; /* スマホ向けにフォントサイズを縮小 */
-                line-height: 1.8; 
+            #text-box { font-size: 1rem; line-height: 2; }
+            #click-prompt { bottom: 18px; right: 24px; font-size: 0.75rem; }
+            
+            /* 選択肢（付箋）を縦並び・横長に変更 */
+            .choices { 
+                display: flex; flex-direction: column; align-items: center; 
+                gap: 14px; width: 100%; max-width: 340px; 
             }
-            #click-prompt {
-                bottom: 10px; right: 20px;
-                font-size: 0.85rem;
+            .sticky-note { 
+                aspect-ratio: auto; width: 92%; max-width: 320px; 
+                height: auto; min-height: 92px; padding: 18px 20px; font-size: 0.95rem; 
             }
-            .choices { grid-template-columns: 1fr 1fr; gap: 15px; }
-            .sticky-note { padding: 10px; font-size: 0.85rem; }
-            #intro img { width: 90%; }
+            .sticky-note:nth-child(odd) { align-self: flex-start; transform: rotate(-1deg); }
+            .sticky-note:nth-child(even) { align-self: flex-end; transform: rotate(1deg); }
+            
+            .sticky-note:nth-child(odd):hover { transform: scale(1.02) rotate(0deg); }
+            .sticky-note:nth-child(even):hover { transform: scale(1.02) rotate(0deg); }
+            
+            /* 黄金の付箋のサイズ調整 */
+            .sticky-note.gold-choice { 
+                width: 100%; max-width: 340px; height: auto; min-height: 90px; 
+                align-self: center; transform: rotate(0deg); 
+            }
+            
+            /* コレクション画面をスマホサイズに */
+            #collection, #extra { box-sizing: border-box; padding: 36px 20px 80px; }
+            .coll-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+            .coll-note { height: 145px; }
         }
     </style>
 </head>
@@ -216,9 +257,10 @@
     <div id="sky"></div>
     
     <div id="intro" class="screen">
-        <img src="title.png" alt="Ice & Ember" style="max-width: 600px; margin-bottom: 40px; opacity: 0.9;">
-        <p style="max-width: 600px; line-height: 2; font-size: 0.95rem; margin-bottom: 50px; color: #aaa;">
-            中欧の峻厳たる山嶺。古き石造りの書庫で綴られる、<br>二人の騎士による、すれ違いと共犯の14日間。
+        <img src="title.png" alt="Ice & Ember">
+        <!-- 固定の改行タグを削除し、ブラウザの折り返しに任せる -->
+        <p>
+            中欧の峻厳たる山嶺。古き石造りの書庫で綴られる、二人の騎士による、すれ違いと共犯の14日間。
         </p>
         <div style="display:flex; flex-direction: column; gap:15px; align-items: center; width: 100%;">
             <button class="btn" onclick="initAudio(); startPrologue();">BEGIN</button>
@@ -228,7 +270,7 @@
     </div>
 
     <div id="game" class="screen">
-        <div id="day-label" style="font-size: 1.1rem; color: #888; margin-bottom: 10px; letter-spacing: 0.1em;">DAY 1</div>
+        <div id="day-label">DAY 1</div>
         <div class="desk" id="desk-trigger">
             <div class="paper">
                 <div id="text-box"></div>
@@ -237,7 +279,7 @@
         </div>
         
         <div class="ui-panel" id="ui-panel">
-            <div id="ui-msg"></div> <!-- 【修正】不要なメッセージを削除 -->
+            <div id="ui-msg"></div> <!-- CSSで非表示化済み -->
             <div id="choice-area" class="choices"></div>
         </div>
     </div>
@@ -246,11 +288,10 @@
         <h2>COLLECTION</h2>
         <div class="sub-text">付箋をクリックして裏返すと、記録された反応を確認できます。</div>
         
-        <!-- 本編では非表示にし、コレクション画面でのみバッジ（実績）をシンプルに表示 -->
         <div style="display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; font-size: 0.9rem; color: #888;">
             <span id="b-care" style="opacity:0.3;">Ⅰ 気遣い</span>
             <span id="b-self" style="opacity:0.3;">Ⅱ 本心</span>
-            <span id="b-rival" style="opacity:0.3;">Ⅲ 好敵手</span> <!-- magicからrivalへ変更 -->
+            <span id="b-rival" style="opacity:0.3;">Ⅲ 好敵手</span> 
             <span id="b-prank" style="opacity:0.3;">Ⅳ 悪戯</span>
             <span id="b-war" style="opacity:0.3;">Ⅴ 宿敵</span>
             <span id="b-true_love" style="opacity:0.3;">Ⅵ 黄金</span>
@@ -282,7 +323,6 @@
     let audioCtx;
     function initAudio() { if(!audioCtx) audioCtx = new (AudioContext || webkitAudioContext)(); }
     
-    // SEを少し控えめな紙の音に調整（オシレーターの設定変更）
     function playPageSound() {
         if(!audioCtx) return;
         const gain = audioCtx.createGain(); gain.gain.value = 0.02;
@@ -294,7 +334,6 @@
     }
 
     let day = 0;
-    // magic を rival へ変更
     let scores = { prank:0, care:0, self:0, rival:0, true:0, grand:0 };
     let affection = 0;
     let textBuffer = [];
@@ -320,12 +359,11 @@
         document.getElementById('ui-panel').style.display = 'none';
         document.getElementById('text-box').innerHTML = "";
         
-        // DAY表示を控えめに
         const dayStr = day === 0 ? "PROLOGUE" : `DAY ${String(day).padStart(2, '0')}`;
         document.getElementById('day-label').innerText = dayStr;
 
         showDayOverlay(dayStr, () => {
-            if (day === 8 && (scores.rival === 7)) isPrankWar = true; // magic を rival へ変更
+            if (day === 8 && (scores.rival === 7)) isPrankWar = true; 
             const data = (isPrankWar && day >= 8) ? warScenarios[day] : scenarios[day];
             let trace = (day <= 7) ? "日誌が静かに置かれている" : "色とりどりの付箋が机を飾っている";
             if (day === 0) trace = "";
@@ -341,7 +379,6 @@
         const ov = document.getElementById('day-overlay');
         document.getElementById('day-overlay-text').innerText = text;
         ov.classList.add('active');
-        // フェード演出を短縮（表示0.6秒程度に）
         setTimeout(() => { ov.classList.remove('active'); if(cb) cb(); }, 600);
     }
 
@@ -367,7 +404,6 @@
         for (let char of line) {
             if (skipRequested) { box.innerHTML = line; break; }
             box.innerHTML += char;
-            // 文字送りを高速化 (40ms -> 15ms)
             await new Promise(r => setTimeout(r, 15));
         }
         isTyping = false; skipRequested = false;
@@ -393,11 +429,9 @@
         opts.forEach(o => {
             const b = document.createElement('button');
             if (day === 0) {
-                // プロローグは通常の選択肢
                 b.className = 'btn';
                 b.style.gridColumn = "1 / -1"; 
             } else {
-                // 1日目以降は付箋スタイル。色は統一（黄金以外）
                 b.className = 'sticky-note' + (o.c === 'true' || o.c === 'grand' ? ' gold-choice' : '');
             }
             b.innerText = o.t;
@@ -420,8 +454,6 @@
             if (day <= 14) render();
             else {
                 document.getElementById('ui-panel').style.display = 'flex';
-                // 【修正】エンディング突入時もメッセージを非表示
-                document.getElementById('ui-msg').innerText = ""; 
                 document.getElementById('choice-area').innerHTML = '<button class="btn" style="border-color:#d4af37; color:#d4af37;" onclick="prepareEpilogue()">エンディングへ</button>';
             }
         }, 150);
@@ -436,7 +468,6 @@
         else if (isPrankWar) { eid = "war"; } 
         else if (scores.true >= 2 || scores.grand > 0) { eid = "true_love"; } 
         else {
-            // magic を rival へ変更
             const keys = ['care', 'self', 'rival', 'prank'];
             eid = keys.reduce((a, b) => scores[a] > scores[b] ? a : b);
         }
@@ -460,8 +491,6 @@
     function showFinalButtons() {
         saveRun(currentEndingID);
         document.getElementById('ui-panel').style.display = 'flex';
-        // 【修正】エンディング後もメッセージ非表示
-        document.getElementById('ui-msg').innerText = ""; 
         document.getElementById('choice-area').innerHTML = `
             <button class="btn" onclick="openCollection()">COLLECTION</button>
             <button class="btn" onclick="location.reload()">REPLAY</button>
@@ -470,7 +499,7 @@
 
     function getSeenBadgeCount() {
         const b = JSON.parse(localStorage.getItem('badge_vFinal_S') || '{}');
-        const keys = ['care', 'self', 'rival', 'prank', 'war', 'true_love']; // magic を rival へ変更
+        const keys = ['care', 'self', 'rival', 'prank', 'war', 'true_love']; 
         return keys.filter(k => b[k]).length;
     }
 
@@ -492,7 +521,6 @@
     }
     function closeCollection() { 
         document.getElementById('collection').style.display = 'none'; 
-        // ゲーム終了後ならタイトルへ、プレイ前ならタイトルへ戻す
         if(day > 14) { location.reload(); }
         else { document.getElementById('intro').style.display = 'flex'; }
     }
@@ -508,7 +536,6 @@
                 const note = document.createElement('div');
                 note.className = 'coll-note';
                 
-                // コレクションでは属性ごとの色を表示（magic を rival へ変更）
                 const bg = n.c==='prank'?'var(--note-prank)':n.c==='care'?'var(--note-care)':n.c==='self'?'var(--note-self)':n.c==='rival'?'var(--note-rival)':'var(--note-gold)';
                 
                 note.innerHTML = `
@@ -520,7 +547,6 @@
                         <div style="flex:1; display:flex; align-items:center; justify-content:center; padding:10px;">${n.r}</div>
                     </div>
                 `;
-                // 遅延アニメーション
                 note.style.animation = `note-appear 0.4s forwards ${idx * 0.05}s`;
                 note.style.opacity = 0;
                 
@@ -529,9 +555,8 @@
             });
         }
         
-        // バッジの表示更新（色を付ける）
         const b = JSON.parse(localStorage.getItem('badge_vFinal_S') || '{}');
-        const mapping = {prank:'b-prank', care:'b-care', self:'b-self', rival:'b-rival', war:'b-war', true_love:'b-true_love', grand:'b-grand'}; // magic を rival へ変更
+        const mapping = {prank:'b-prank', care:'b-care', self:'b-self', rival:'b-rival', war:'b-war', true_love:'b-true_love', grand:'b-grand'}; 
         for(let key in mapping) {
             if(b[key] || (key==='grand' && b.grand_finale)) {
                 document.getElementById(mapping[key]).style.opacity = '1';
@@ -542,7 +567,7 @@
         const h = [];
         if(!b.care) h.push("未踏：気遣い");
         if(!b.self) h.push("未踏：本心");
-        if(!b.rival) h.push("未踏：好敵手"); // magic を rival へ変更
+        if(!b.rival) h.push("未踏：好敵手"); 
         if(!b.prank) h.push("未踏：悪戯");
         if(!b.war) h.push("未踏：宿敵（闘志のみで貫く）");
         if(!b.true_love) h.push("未踏：黄金（特別な誓い）");
