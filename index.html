@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="ja"><head>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ice & Ember: 14 Days Chronicle</title>
@@ -66,9 +68,18 @@
             border-radius: 2px; /* 角丸をほぼ無くす */
             box-shadow: 0 4px 20px rgba(0,0,0,0.3); /* 自然で弱い影 */
             border: 1px solid #dcdcdc; /* 非常に薄い枠線 */
+            
+            /* 【修正】枠の高さを固定し、可変させない */
+            height: 400px; 
+            overflow-y: hidden; /* 中のテキストが増えてもスクロールさせず、枠の拡張も防ぐ */
         }
         
-        #text-box { font-size: 1.1rem; line-height: 2.2; text-align: left; min-height: 200px; white-space: pre-wrap; }
+        /* 【修正】テキストボックスのサイズを固定し、枠の拡張を防止 */
+        #text-box { 
+            font-size: 1.1rem; line-height: 2.2; text-align: left; 
+            height: 100%; /* paperの高さいっぱいに広げる */
+            white-space: pre-wrap; 
+        }
         
         /* CLICKの点滅を控えめに */
         #click-prompt { 
@@ -77,6 +88,8 @@
             animation: gentle-fade 2s infinite; 
             visibility: hidden; 
             font-family: sans-serif;
+            background: var(--paper); /* テキストと被った場合に見やすくする */
+            padding-left: 10px;
         }
         @keyframes gentle-fade { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.8; } }
 
@@ -88,7 +101,8 @@
             padding: 20px;
         }
         
-        #ui-msg { margin-bottom: 40px; font-size: 1.1rem; color: #aaa; font-weight: normal; }
+        /* 【修正】プロローグ後の「痕跡を残す」等のメッセージを完全に消すため高さを0に */
+        #ui-msg { margin-bottom: 0; font-size: 0; color: transparent; font-weight: normal; height: 0; overflow: hidden;}
 
         .choices { 
             display: grid; 
@@ -176,9 +190,21 @@
 
         /* スマホ対応 */
         @media (max-width: 600px) {
-            .paper { padding: 30px 20px; margin: 10px; }
+            .paper { 
+                padding: 20px; /* スマホ向けに余白を減らす */
+                margin: 10px; 
+                height: 350px; /* スマホ向けに固定高さを少し小さく */
+            }
+            #text-box {
+                font-size: 0.95rem; /* スマホ向けにフォントサイズを縮小 */
+                line-height: 1.8; 
+            }
+            #click-prompt {
+                bottom: 10px; right: 20px;
+                font-size: 0.85rem;
+            }
             .choices { grid-template-columns: 1fr 1fr; gap: 15px; }
-            .sticky-note { padding: 10px; font-size: 0.9rem; }
+            .sticky-note { padding: 10px; font-size: 0.85rem; }
             #intro img { width: 90%; }
         }
     </style>
@@ -211,7 +237,7 @@
         </div>
         
         <div class="ui-panel" id="ui-panel">
-            <div id="ui-msg">痕跡を残す</div>
+            <div id="ui-msg"></div> <!-- 【修正】不要なメッセージを削除 -->
             <div id="choice-area" class="choices"></div>
         </div>
     </div>
@@ -394,7 +420,8 @@
             if (day <= 14) render();
             else {
                 document.getElementById('ui-panel').style.display = 'flex';
-                document.getElementById('ui-msg').innerText = "記録の終端。";
+                // 【修正】エンディング突入時もメッセージを非表示
+                document.getElementById('ui-msg').innerText = ""; 
                 document.getElementById('choice-area').innerHTML = '<button class="btn" style="border-color:#d4af37; color:#d4af37;" onclick="prepareEpilogue()">エンディングへ</button>';
             }
         }, 150);
@@ -433,7 +460,8 @@
     function showFinalButtons() {
         saveRun(currentEndingID);
         document.getElementById('ui-panel').style.display = 'flex';
-        document.getElementById('ui-msg').innerText = "End of Chronicle";
+        // 【修正】エンディング後もメッセージ非表示
+        document.getElementById('ui-msg').innerText = ""; 
         document.getElementById('choice-area').innerHTML = `
             <button class="btn" onclick="openCollection()">COLLECTION</button>
             <button class="btn" onclick="location.reload()">REPLAY</button>
