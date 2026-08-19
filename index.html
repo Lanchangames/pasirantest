@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
+<!DOCTYPE html><html lang="ja"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ice & Ember: 14 Days Chronicle</title>
@@ -21,7 +19,7 @@
             --note-prank: #d9edf8;
             --note-care: #e2f0d9;
             --note-self: #f8e1e1;
-            --note-magic: #ede4f5;
+            --note-rival: #ede4f5;  /* 旧magicの色をそのままrivalへ継承 */
             --note-gold: #fcf4cb;
         }
         
@@ -226,7 +224,7 @@
         <div style="display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; font-size: 0.9rem; color: #888;">
             <span id="b-care" style="opacity:0.3;">Ⅰ 気遣い</span>
             <span id="b-self" style="opacity:0.3;">Ⅱ 本心</span>
-            <span id="b-magic" style="opacity:0.3;">Ⅲ 共鳴</span>
+            <span id="b-rival" style="opacity:0.3;">Ⅲ 好敵手</span> <!-- magicからrivalへ変更 -->
             <span id="b-prank" style="opacity:0.3;">Ⅳ 悪戯</span>
             <span id="b-war" style="opacity:0.3;">Ⅴ 宿敵</span>
             <span id="b-true_love" style="opacity:0.3;">Ⅵ 黄金</span>
@@ -270,7 +268,8 @@
     }
 
     let day = 0;
-    let scores = { prank:0, care:0, self:0, magic:0, true:0, grand:0 };
+    // magic を rival へ変更
+    let scores = { prank:0, care:0, self:0, rival:0, true:0, grand:0 };
     let affection = 0;
     let textBuffer = [];
     let textIdx = 0;
@@ -300,7 +299,7 @@
         document.getElementById('day-label').innerText = dayStr;
 
         showDayOverlay(dayStr, () => {
-            if (day === 8 && (scores.magic === 7)) isPrankWar = true;
+            if (day === 8 && (scores.rival === 7)) isPrankWar = true; // magic を rival へ変更
             const data = (isPrankWar && day >= 8) ? warScenarios[day] : scenarios[day];
             let trace = (day <= 7) ? "日誌が静かに置かれている" : "色とりどりの付箋が机を飾っている";
             if (day === 0) trace = "";
@@ -410,7 +409,8 @@
         else if (isPrankWar) { eid = "war"; } 
         else if (scores.true >= 2 || scores.grand > 0) { eid = "true_love"; } 
         else {
-            const keys = ['care', 'self', 'magic', 'prank'];
+            // magic を rival へ変更
+            const keys = ['care', 'self', 'rival', 'prank'];
             eid = keys.reduce((a, b) => scores[a] > scores[b] ? a : b);
         }
         textBuffer = endingScripts[eid] || endingScripts['self'];
@@ -442,7 +442,7 @@
 
     function getSeenBadgeCount() {
         const b = JSON.parse(localStorage.getItem('badge_vFinal_S') || '{}');
-        const keys = ['care', 'self', 'magic', 'prank', 'war', 'true_love'];
+        const keys = ['care', 'self', 'rival', 'prank', 'war', 'true_love']; // magic を rival へ変更
         return keys.filter(k => b[k]).length;
     }
 
@@ -480,8 +480,8 @@
                 const note = document.createElement('div');
                 note.className = 'coll-note';
                 
-                // コレクションでは属性ごとの色を表示（少し彩度を抑えたパステル）
-                const bg = n.c==='prank'?'var(--note-prank)':n.c==='care'?'var(--note-care)':n.c==='self'?'var(--note-self)':n.c==='magic'?'var(--note-magic)':'var(--note-gold)';
+                // コレクションでは属性ごとの色を表示（magic を rival へ変更）
+                const bg = n.c==='prank'?'var(--note-prank)':n.c==='care'?'var(--note-care)':n.c==='self'?'var(--note-self)':n.c==='rival'?'var(--note-rival)':'var(--note-gold)';
                 
                 note.innerHTML = `
                     <div class="coll-note-front" style="background:${bg}">
@@ -503,7 +503,7 @@
         
         // バッジの表示更新（色を付ける）
         const b = JSON.parse(localStorage.getItem('badge_vFinal_S') || '{}');
-        const mapping = {prank:'b-prank', care:'b-care', self:'b-self', magic:'b-magic', war:'b-war', true_love:'b-true_love', grand:'b-grand'};
+        const mapping = {prank:'b-prank', care:'b-care', self:'b-self', rival:'b-rival', war:'b-war', true_love:'b-true_love', grand:'b-grand'}; // magic を rival へ変更
         for(let key in mapping) {
             if(b[key] || (key==='grand' && b.grand_finale)) {
                 document.getElementById(mapping[key]).style.opacity = '1';
@@ -514,9 +514,9 @@
         const h = [];
         if(!b.care) h.push("未踏：気遣い");
         if(!b.self) h.push("未踏：本心");
-        if(!b.magic) h.push("未踏：共鳴");
+        if(!b.rival) h.push("未踏：好敵手"); // magic を rival へ変更
         if(!b.prank) h.push("未踏：悪戯");
-        if(!b.war) h.push("未踏：宿敵（魔力のみで貫く）");
+        if(!b.war) h.push("未踏：宿敵（闘志のみで貫く）");
         if(!b.true_love) h.push("未踏：黄金（特別な誓い）");
         if(getSeenBadgeCount() >= 6 && (!b.grand && !b.grand_finale)) h.push("未踏：真実（全てを巡った果てに）");
         
