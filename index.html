@@ -133,13 +133,13 @@
             border: none;
             border-radius: 0;
             box-shadow: 2px 4px 8px rgba(0,0,0,0.2);
-            width: 92%;
-            max-width: 320px;
-            min-height: 92px;
+            width: 82%;
+            max-width: 260px;
+            min-height: 68px;
             height: auto;
-            padding: 18px 20px;
-            font-size: 0.95rem;
-            line-height: 1.6;
+            padding: 12px 16px;
+            font-size: 0.88rem;
+            line-height: 1.5;
             text-align: center;
             cursor: pointer;
             transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
@@ -174,6 +174,11 @@
         @keyframes note-appear {
             0% { opacity: 0; transform: translateY(-5px) rotate(0deg); }
             100% { opacity: 1; }
+        }
+
+        @keyframes coll-note-appear {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         .sticky-note:nth-child(1) { animation-delay: 0.1s; }
         .sticky-note:nth-child(2) { animation-delay: 0.2s; }
@@ -324,7 +329,6 @@
         </div>
 
         <div id="coll-grid" class="coll-grid"></div>
-        <div id="hint-box" style="margin-top: 40px; font-size: 0.9rem; color: #888; border-top: 1px dashed #444; padding-top: 20px; width: 100%;"></div>
         
         <div style="display:flex; gap:15px; margin-top:50px; width: 100%;">
             <button class="btn" onclick="closeCollection();" style="max-width: 150px;">BACK</button>
@@ -455,10 +459,6 @@
             }
         } else if (day === 8) {
             label = "さて、何て返そうか";
-        } else if (day >= 9 && day < 14) {
-            label = "今日は何を書こうか";
-        } else if (day === 14) {
-            label = "最後の付箋に何を書こうか";
         }
 
         area.innerHTML = `
@@ -502,27 +502,27 @@
             getSeenBadgeCount() >= 2
         ) {
             const golds = {
-    10: {
-        t: "『お前とこうして話す時間、好きだよ』",
-        c: 'true',
-        r: "二枚の付箋が風もないのに隣り合う。赤い付箋には『……俺も嫌いではない。貴公が余計なことさえ言わなければな』。"
-    },
-    11: {
-        t: "『お前が相棒でよかったと思ってる』",
-        c: 'true',
-        r: "付箋の上に氷と炎の小さな紋様が並んで浮かぶ。書き直した跡の後には『俺もだ。貴公ほど手の掛かる相棒も他にいないがな』。"
-    },
-    12: {
-        t: "『このやり取りが終わるの、少し寂しい』",
-        c: 'true',
-        r: "付箋の端がなかなか机から剥がれない。赤い付箋には短く『……俺もだ』。その後には何も続いていない。"
-    },
-    13: {
-        t: "『任務が終わっても、こうして話していたい』",
-        c: 'true',
-        r: "二枚の付箋が並んだまま、しっかり机に貼り付いている。『ならばそうすればいい』。その下には『付箋でなくとも構わん』。"
-    }
-};
+                10: {
+                    t: "『お前とこうして話す時間、好きだよ』",
+                    c: 'true',
+                    r: "二枚の付箋が風もないのに隣り合う。赤い付箋には『……俺も嫌いではない。貴公が余計なことさえ言わなければな』。"
+                },
+                11: {
+                    t: "『お前が相棒でよかったと思ってる』",
+                    c: 'true',
+                    r: "付箋の上に氷と炎の小さな紋様が並んで浮かぶ。書き直した跡の後には『俺もだ。貴公ほど手の掛かる相棒も他にいないがな』。"
+                },
+                12: {
+                    t: "『このやり取りが終わるの、少し寂しい』",
+                    c: 'true',
+                    r: "付箋の端がなかなか机から剥がれない。赤い付箋には短く『……俺もだ』。その後には何も続いていない。"
+                },
+                13: {
+                    t: "『任務が終わっても、こうして話していたい』",
+                    c: 'true',
+                    r: "二枚の付箋が並んだまま、しっかり机に貼り付いている。『ならばそうすればいい』。その下には『付箋でなくとも構わん』。"
+                }
+            };
 
             opts.push(golds[day]);
         }
@@ -601,6 +601,30 @@
         }, 150);
     }
 
+    function shareToX() {
+        const endingNames = {
+            care: "I 明日も、この場所で",
+            self: "II 言葉にしなかったこと",
+            rival: "III 君だけには負けられない",
+            prank: "IV 笑ったほうの負け",
+            war: "V 決着は、まだ先に",
+            true_love: "VI 消えない言葉",
+            grand: "VII 十四日目のその先へ"
+        };
+
+        const endingName = endingNames[currentEndingID] || "";
+        const text = `「The Magic Sticky Notes」をプレイしました！\nEND：${endingName}`;
+        const url = location.origin + location.pathname;
+
+        const shareUrl =
+            "https://twitter.com/intent/tweet?text=" +
+            encodeURIComponent(text) +
+            "&url=" +
+            encodeURIComponent(url);
+
+        window.open(shareUrl, "_blank", "noopener,noreferrer");
+    }
+
     function prepareEpilogue() {
         document.getElementById('ui-panel').style.display = 'none';
         isEndingMode = true;
@@ -645,10 +669,11 @@
 
     function showFinalButtons() {
         saveRun(currentEndingID);
+
         document.getElementById('ui-panel').style.display = 'flex';
         document.getElementById('choice-area').innerHTML = `
-            <button class="btn" onclick="openCollection()">COLLECTION</button>
-            <button class="btn" onclick="location.reload()">REPLAY</button>
+            <button class="btn" onclick="location.reload()">スタート画面に戻る</button>
+            <button class="btn" onclick="shareToX()">Xで報告する</button>
         `;
     }
 
@@ -702,14 +727,20 @@
                 
                 note.innerHTML = `
                     <div class="coll-note-front" style="background:${bg}">
-                        <div style="font-size:0.8rem; color:#666;">DAY ${String(n.d).padStart(2, '0')}</div>
-                        <div style="font-size:1.1rem; margin-top:8px;">${n.t}</div>
+                        <div style="font-size:0.8rem; color:#666;">
+                            DAY ${String(n.d).padStart(2, '0')}
+                        </div>
+                        <div style="font-size:1.1rem; margin-top:8px;">
+                            ${n.t}
+                        </div>
                     </div>
                     <div class="coll-note-back">
-                        <div style="flex:1; display:flex; align-items:center; justify-content:center; padding:10px;">${n.r}</div>
+                        <div>
+                            ${n.r}
+                        </div>
                     </div>
                 `;
-                note.style.animation = `note-appear 0.4s forwards ${idx * 0.05}s`;
+                note.style.animation = `coll-note-appear 0.4s forwards ${idx * 0.05}s`;
                 note.style.opacity = 0;
                 
                 note.onclick = () => { playPageSound(); note.classList.toggle('flipped'); };
@@ -725,24 +756,6 @@
                 document.getElementById(mapping[key]).style.color = '#d4af37';
             }
         }
-
-        const h = [];
-        if(!b.care) h.push("未踏：I 明日も、この場所で");
-        if(!b.self) h.push("未踏：II 言葉にしなかったこと");
-        if(!b.rival) h.push("未踏：III 君だけには負けられない");
-        if(!b.prank) h.push("未踏：IV 笑ったほうの負け");
-        if(!b.war) h.push("未踏：V 決着は、まだ先に");
-        if(!b.true_love) h.push("未踏：VI 消えない言葉");
-
-        if (
-            getSeenBadgeCount() >= 6 &&
-            !b.grand &&
-            !b.grand_finale
-        ) {
-            h.push("未踏：VII 十四日目のその先へ");
-        }
-        
-        document.getElementById('hint-box').innerHTML = (h.length > 0) ? h.join(" / ") : "全ての記憶を収集した。";
     }
 </script>
 </body>
