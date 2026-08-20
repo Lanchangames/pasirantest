@@ -376,13 +376,13 @@
         <div class="sub-text">付箋をクリックして裏返すと、パーシヴァルの反応を確認できます。</div>
         
         <div style="display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; font-size: 0.9rem; color: #888;">
-            <span id="b-care" style="opacity:0.3;">I 明日も、この場所で</span>
-            <span id="b-self" style="opacity:0.3;">II 言葉にしなかったこと</span>
-            <span id="b-rival" style="opacity:0.3;">III 目を逸らさないで</span>
-            <span id="b-prank" style="opacity:0.3;">IV 笑ったほうの負け</span>
-            <span id="b-war" style="opacity:0.3;">V 決着は、まだ先に</span>
-            <span id="b-true_love" style="opacity:0.3;">VI 消えない言葉</span>
-            <span id="b-grand" style="opacity:0.3;">VII 十四日目のその先へ</span>
+            <span id="b-care" style="opacity:0.3;">I お茶はふたり分</span>
+            <span id="b-self" style="opacity:0.3;">II きみに言いたかったこと</span>
+            <span id="b-rival" style="opacity:0.3;">III ちゃんと、俺を見てて</span>
+            <span id="b-prank" style="opacity:0.3;">IV 笑ったほうの勝ち</span>
+            <span id="b-war" style="opacity:0.3;">V 勝負はまた明日</span>
+            <span id="b-true_love" style="opacity:0.3;">VI きみの隣で、続きを</span>
+            <span id="b-grand" style="opacity:0.3;">VII また明日、十五日目</span>
         </div>
 
         <div id="coll-grid" class="coll-grid"></div>
@@ -685,6 +685,25 @@
         // DAY14は「翌日」がないので、rをTRACEへ送るだけでは一度も表示されない。
         // 選んだ付箋へのパーシヴァルの返事を、その場で一度表示してから終了する。
         if (day === 14) {
+            let all = JSON.parse(localStorage.getItem('lib_vFinal_S') || "[]");
+
+            const finalNote = {
+                d: day,
+                t: o.t,
+                c: o.c,
+                r: o.r
+            };
+
+            const index = all.findIndex(x => x.t === finalNote.t);
+
+            if (index >= 0) {
+                all[index] = finalNote;
+            } else {
+                all.push(finalNote);
+            }
+
+            localStorage.setItem('lib_vFinal_S', JSON.stringify(all));
+
             setTimeout(() => {
                 isFinalDayReply = true;
                 textBuffer = [o.r];
@@ -710,13 +729,13 @@
 
     function shareToX() {
         const endingNames = {
-            care: "I 明日も、この場所で",
-            self: "II 言葉にしなかったこと",
-            rival: "III 目を逸らさないで",
-            prank: "IV 笑ったほうの負け",
-            war: "V 決着は、まだ先に",
-            true_love: "VI 消えない言葉",
-            grand: "VII 十四日目のその先へ"
+            care: "I お茶はふたり分",
+            self: "II きみに言いたかったこと",
+            rival: "III ちゃんと、俺を見てて",
+            prank: "IV 笑ったほうの勝ち",
+            war: "V 勝負はまた明日",
+            true_love: "VI きみの隣で、続きを",
+            grand: "VII また明日、十五日目"
         };
 
         const endingName = endingNames[currentEndingID] || "";
