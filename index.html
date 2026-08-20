@@ -261,7 +261,8 @@
     <div id="intro" class="screen">
         <img src="title.png" alt="Magic Sticky Notes">
         <p>
-        夜の書庫番を任された副団長たち。<br>2人の秘密の2週間が今始まる＿！
+            夜の書庫番を任された副団長たち。<br>
+            2人の秘密の2週間が今始まる――！
         </p>
         <div style="display:flex; flex-direction: column; gap:15px; align-items: center; width: 100%;">
             <button class="btn" onclick="initAudio(); startPrologue();">物語をはじめる</button>
@@ -290,13 +291,13 @@
         <div class="sub-text">付箋をクリックして裏返すと、パーシヴァルの反応を確認できます。</div>
         
         <div style="display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; font-size: 0.9rem; color: #888;">
-            <span id="b-care" style="opacity:0.3;">End1 ずっと</span>
-            <span id="b-self" style="opacity:0.3;">End2 本心</span>
-            <span id="b-rival" style="opacity:0.3;">Ⅲ 好敵手</span> 
-            <span id="b-prank" style="opacity:0.3;">Ⅳ 悪戯</span>
-            <span id="b-war" style="opacity:0.3;">Ⅴ 宿敵</span>
-            <span id="b-true_love" style="opacity:0.3;">Ⅵ 黄金</span>
-            <span id="b-grand" style="opacity:0.3;">Ⅶ 真実</span>
+            <span id="b-care" style="opacity:0.3;">I 明日も、この場所で</span>
+            <span id="b-self" style="opacity:0.3;">II 言葉にしなかったこと</span>
+            <span id="b-rival" style="opacity:0.3;">III 君だけには負けられない</span>
+            <span id="b-prank" style="opacity:0.3;">IV 笑ったほうの負け</span>
+            <span id="b-war" style="opacity:0.3;">V 決着は、まだ先に</span>
+            <span id="b-true_love" style="opacity:0.3;">VI 消えない言葉</span>
+            <span id="b-grand" style="opacity:0.3;">VII 十四日目のその先へ</span>
         </div>
 
         <div id="coll-grid" class="coll-grid"></div>
@@ -313,7 +314,14 @@
             <h3>Credits</h3>
             <p>制作・シナリオ：ろかス<br>イラスト：</p>
             <h3>Feedback</h3>
-            <p>感想をお待ちしております。<br>https://marshmallow-qa.com/oj0afz3donoawsc</p>
+            <p>
+                感想をお待ちしております。<br>
+                <a href="https://marshmallow-qa.com/oj0afz3donoawsc"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                    マシュマロ
+                </a>
+            </p>
         </div>
         <button class="btn" onclick="closeExtra();" style="max-width: 150px;">BACK</button>
     </div>
@@ -428,51 +436,65 @@
         const data = (isPrankWar && day >= 8) ? warScenarios[day] : scenarios[day];
         let opts = [...data.o].sort(() => Math.random() - 0.5); 
         
-// DAY10〜13：黄金の付箋
-if (
-    !isPrankWar &&
-    day >= 10 &&
-    day < 14 &&
-    affection >= 90 &&
-    getSeenBadgeCount() >= 2
-) {
-    const golds = {
-        10: {
-            t: "『お前とこうして話す時間、好きだよ』",
-            c: 'true',
-            r: "赤い付箋に『……俺も嫌いではない。貴公が余計なことさえ言わなければな』とある。最後の一言までなければ素直なのに。"
-        },
-        11: {
-            t: "『お前が相棒でよかったと思ってる』",
-            c: 'true',
-            r: "しばらく書き直した跡の後に、『俺もだ。貴公ほど手の掛かる相棒も他にいないがな』と残されていた。"
-        },
-        12: {
-            t: "『このやり取りが終わるの、少し寂しい』",
-            c: 'true',
-            r: "赤い付箋には短く『……俺もだ』。言い訳も茶化しも、その後には続いていなかった。"
-        },
-        13: {
-            t: "『任務が終わっても、こうして話していたい』",
-            c: 'true',
-            r: "『ならばそうすればいい』とある。その下に少し間を空けて、『付箋でなくとも構わん』と追記されていた。"
-        }
-    };
+        // DAY10〜13：黄金の付箋
+        if (
+            !isPrankWar &&
+            day >= 10 &&
+            day < 14 &&
+            affection >= 90 &&
+            getSeenBadgeCount() >= 2
+        ) {
+            const golds = {
+                10: {
+                    t: "『お前とこうして話す時間、好きだよ』",
+                    c: 'true',
+                    r: "赤い付箋に『……俺も嫌いではない。貴公が余計なことさえ言わなければな』とある。最後の一言までなければ素直なのに。"
+                },
+                11: {
+                    t: "『お前が相棒でよかったと思ってる』",
+                    c: 'true',
+                    r: "しばらく書き直した跡の後に、『俺もだ。貴公ほど手の掛かる相棒も他にいないがな』と残されていた。"
+                },
+                12: {
+                    t: "『このやり取りが終わるの、少し寂しい』",
+                    c: 'true',
+                    r: "赤い付箋には短く『……俺もだ』。言い訳も茶化しも、その後には続いていなかった。"
+                },
+                13: {
+                    t: "『任務が終わっても、こうして話していたい』",
+                    c: 'true',
+                    r: "『ならばそうすればいい』とある。その下に少し間を空けて、『付箋でなくとも構わん』と追記されていた。"
+                }
+            };
 
-    opts.push(golds[day]);
-}
-        } else // DAY14：黄金ルート最終選択肢
-if (
-    !isPrankWar &&
-    day === 14 &&
-    scores.true >= 1
-) {
-    opts.push({
-        t:"『明日からも、お前とこうして話していたい』",
-        c:'true',
-        r:""
-    });
-}
+            opts.push(golds[day]);
+        }
+
+        // DAY14：黄金ルート最終選択肢
+        if (
+            !isPrankWar &&
+            day === 14 &&
+            scores.true >= 1
+        ) {
+            opts.push({
+                t: "『明日からも、お前とこうして話していたい』",
+                c: 'true',
+                r: ""
+            });
+        }
+        
+        // 全回収エンド専用選択肢
+        if (
+            !isPrankWar &&
+            day === 14 &&
+            getSeenBadgeCount() >= 6
+        ) {
+            opts.push({
+                t: "最後の付箋をめくる",
+                c: 'grand',
+                r: ""
+            });
+        }
 
         opts.forEach(o => {
             const b = document.createElement('button');
@@ -510,17 +532,30 @@ if (
     function prepareEpilogue() {
         document.getElementById('ui-panel').style.display = 'none';
         isEndingMode = true;
-        const badgeCount = getSeenBadgeCount();
+
         let eid = "";
-        if (badgeCount >= 6) { eid = "grand"; } 
-        else if (isPrankWar) { eid = "war"; } 
-        else if (scores.true >= 2 || scores.grand > 0) { eid = "true_love"; } 
-        else {
+
+        const choseEarlierGold = currentRunNotes.some(
+            n => n.d >= 10 && n.d <= 13 && n.c === 'true'
+        );
+
+        const choseFinalGold = currentRunNotes.some(
+            n => n.d === 14 && n.c === 'true'
+        );
+
+        if (scores.grand > 0) {
+            eid = "grand";
+        } else if (isPrankWar) {
+            eid = "war";
+        } else if (choseEarlierGold && choseFinalGold) {
+            eid = "true_love";
+        } else {
             const keys = ['care', 'self', 'rival', 'prank'];
             eid = keys.reduce((a, b) => scores[a] > scores[b] ? a : b);
         }
+
         textBuffer = endingScripts[eid] || endingScripts['self'];
-        textIdx = 0; 
+        textIdx = 0;
         currentEndingID = eid;
         startEpilogue();
     }
@@ -613,13 +648,20 @@ if (
         }
 
         const h = [];
-        if(!b.care) h.push("未踏：気遣い");
-        if(!b.self) h.push("未踏：本心");
-        if(!b.rival) h.push("未踏：好敵手"); 
-        if(!b.prank) h.push("未踏：悪戯");
-        if(!b.war) h.push("未踏：宿敵（闘志のみで貫く）");
-        if(!b.true_love) h.push("未踏：黄金（特別な誓い）");
-        if(getSeenBadgeCount() >= 6 && (!b.grand && !b.grand_finale)) h.push("未踏：真実（全てを巡った果てに）");
+        if(!b.care) h.push("未踏：I 明日も、この場所で");
+        if(!b.self) h.push("未踏：II 言葉にしなかったこと");
+        if(!b.rival) h.push("未踏：III 君だけには負けられない");
+        if(!b.prank) h.push("未踏：IV 笑ったほうの負け");
+        if(!b.war) h.push("未踏：V 決着は、まだ先に");
+        if(!b.true_love) h.push("未踏：VI 消えない言葉");
+
+        if (
+            getSeenBadgeCount() >= 6 &&
+            !b.grand &&
+            !b.grand_finale
+        ) {
+            h.push("未踏：VII 十四日目のその先へ");
+        }
         
         document.getElementById('hint-box').innerHTML = (h.length > 0) ? h.join(" / ") : "全ての記憶を収集した。";
     }
