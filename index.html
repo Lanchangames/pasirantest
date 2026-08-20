@@ -587,8 +587,8 @@
         isTyping = false;
         skipRequested = false;
     }
-
-    document.getElementById('desk-trigger').onclick = () => {
+　　　　　document.getElementById('desk-trigger').onpointerdown = () => {
+    
         if((!choiceMade || isEndingMode || isFinalDayReply) && document.getElementById('ui-panel').style.display !== 'flex') advance();
     };
 
