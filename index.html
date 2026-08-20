@@ -353,6 +353,7 @@
             <button class="title-note-btn" onclick="initAudio(); startPrologue();">物語をはじめる</button>
             <button class="title-note-btn" onclick="openMemories();">思い出</button>
             <button class="title-note-btn" onclick="openExtra();">INFORMATION</button>
+            <button id="grand-home-btn" class="title-note-btn" onclick="initAudio(); startGrandFinale();" style="display:none; background-color:var(--note-gold); border:1px solid #d4af37;">15日目へ</button>
         </div>
     </div>
 
@@ -693,19 +694,6 @@
                 r: "付箋の裏には、後から書き足された赤い文字がある。『明日だけの話にするな、ランスロット。話したい時は来い。俺もお前に会いに行く』。"
             });
         }
-        
-        // 全回収エンド専用選択肢
-        if (
-            !isPrankWar &&
-            day === 14 &&
-            getSeenBadgeCount() >= 6
-        ) {
-            opts.push({
-                t: "最後の付箋をめくる",
-                c: 'grand',
-                r: "裏面には、見覚えのある赤い字で追伸が残されている。『見つけたな、ランスロット。次からは隠さず渡す。お前も、消さずに書け』。"
-            });
-        }
 
         opts.forEach(o => {
             const b = document.createElement('button');
@@ -870,6 +858,41 @@
         return keys.filter(k => b[k]).length;
     }
 
+    function hasUnlockedAllNonGrandEndings() {
+        const played = getPlayedEndings();
+        const unlocks = getEndingUnlocks();
+        const keys = ['care', 'self', 'rival', 'prank', 'war', 'true_love'];
+        return keys.every(k => played[k] || unlocks[k]);
+    }
+
+    function updateGrandHomeButton() {
+        const button = document.getElementById('grand-home-btn');
+        if (!button) return;
+        button.style.display = hasUnlockedAllNonGrandEndings() ? 'block' : 'none';
+    }
+
+    function startGrandFinale() {
+        if (!hasUnlockedAllNonGrandEndings()) return;
+
+        document.getElementById('intro').style.display = 'none';
+        document.getElementById('game').style.display = 'flex';
+        document.getElementById('ui-panel').style.display = 'none';
+        document.getElementById('text-box').innerHTML = "";
+        document.getElementById('click-prompt').style.visibility = 'hidden';
+        document.getElementById('day-label').innerText = 'DAY 15';
+
+        day = 15;
+        isEndingMode = true;
+        isFinalDayReply = false;
+        isDayTransitioning = false;
+        choiceMade = false;
+        textBuffer = endingScripts['grand'] || [];
+        textIdx = 0;
+        currentEndingID = 'grand';
+
+        startEpilogue();
+    }
+
     const endingArchiveData = [
         {
             id: 'care',
@@ -1032,6 +1055,7 @@
 
     function closeMemories() {
         document.getElementById('memories').style.display = 'none';
+        updateGrandHomeButton();
         document.getElementById('intro').style.display = 'flex';
     }
 
@@ -1330,6 +1354,8 @@
             }
         }
     }
+
+    updateGrandHomeButton();
 </script>
 </body>
 </html>
