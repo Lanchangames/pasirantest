@@ -205,7 +205,7 @@
             z-index: 6000; display: none; flex-direction: column; align-items: flex-start; 
             max-width: 800px; margin: 0 auto; width: 100%;
         }
-        #collection, #memories, #ending-collection, #ending-viewer {
+        #collection, #extra, #memories, #ending-collection, #ending-viewer {
             left: 50%;
             transform: translateX(-50%);
         }
@@ -361,7 +361,7 @@
         <div class="desk" id="desk-trigger">
             <div class="paper">
                 <div id="text-box"></div>
-                <div id="click-prompt">continue ›</div>
+                <div id="click-prompt">next ›</div>
             </div>
         </div>
         
@@ -382,7 +382,7 @@
 
         <div id="memory-key-count" style="width:100%; text-align:center; margin-top:30px; color:#aaa;">🔑 × 0</div>
 
-        <div style="display:flex; gap:15px; margin-top:50px; width: 100%;">
+        <div style="display:flex; gap:15px; margin-top:50px; width: 100%; justify-content:center;">
             <button class="btn" onclick="closeMemories();" style="max-width: 150px;">BACK</button>
         </div>
     </div>
@@ -394,7 +394,7 @@
 
         <div id="ending-list" class="content-box" style="margin-bottom:0;"></div>
 
-        <div style="display:flex; gap:15px; margin-top:50px; width: 100%;">
+        <div style="display:flex; gap:15px; margin-top:50px; width: 100%; justify-content:center;">
             <button class="btn" onclick="closeEndingCollection();" style="max-width: 150px;">BACK</button>
         </div>
     </div>
@@ -403,7 +403,7 @@
         <h2 id="ending-viewer-title">ENDING</h2>
         <div id="ending-viewer-content" class="content-box"></div>
 
-        <div style="display:flex; gap:15px; margin-top:20px; width: 100%;">
+        <div style="display:flex; gap:15px; margin-top:20px; width: 100%; justify-content:center;">
             <button class="btn" onclick="closeEndingViewer();" style="max-width: 150px;">BACK</button>
         </div>
     </div>
@@ -413,18 +413,18 @@
         <div class="sub-text">付箋をクリックして裏返すと、パーシヴァルの反応を確認できます。</div>
         
         <div style="display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; font-size: 0.9rem; color: #888;">
-            <span id="b-care" style="opacity:0.3;">I お茶はふたり分</span>
-            <span id="b-self" style="opacity:0.3;">II きみに言いたかったこと</span>
-            <span id="b-rival" style="opacity:0.3;">III ちゃんと、俺を見てて</span>
-            <span id="b-prank" style="opacity:0.3;">IV 笑ったほうの勝ち</span>
-            <span id="b-war" style="opacity:0.3;">V 勝負はまた明日</span>
-            <span id="b-true_love" style="opacity:0.3;">VI きみの隣で、続きを</span>
-            <span id="b-grand" style="opacity:0.3;">VII また明日、十五日目</span>
+            <span id="b-care" style="opacity:0.3;">I ？？？？？？？？</span>
+            <span id="b-self" style="opacity:0.3;">II ？？？？？？？？</span>
+            <span id="b-rival" style="opacity:0.3;">III ？？？？？？？？</span>
+            <span id="b-prank" style="opacity:0.3;">IV ？？？？？？？？</span>
+            <span id="b-war" style="opacity:0.3;">V ？？？？？？？？</span>
+            <span id="b-true_love" style="opacity:0.3;">VI ？？？？？？？？</span>
+            <span id="b-grand" style="opacity:0.3;">VII ？？？？？？？？</span>
         </div>
 
         <div id="coll-grid" class="coll-grid"></div>
         
-        <div style="display:flex; gap:15px; margin-top:50px; width: 100%;">
+        <div style="display:flex; gap:15px; margin-top:50px; width: 100%; justify-content:center;">
             <button class="btn" onclick="closeCollection();" style="max-width: 150px;">BACK</button>
         </div>
     </div>
@@ -444,7 +444,7 @@
                 </a>
             </p>
         </div>
-        <button class="btn" onclick="closeExtra();" style="max-width: 150px;">BACK</button>
+        <button class="btn" onclick="closeExtra();" style="max-width: 150px; align-self:center;">BACK</button>
     </div>
 
 <script>
@@ -1297,11 +1297,29 @@
         }
         
         const b = JSON.parse(localStorage.getItem('badge_vFinal_S') || '{}');
+        const unlocks = getEndingUnlocks();
         const mapping = {prank:'b-prank', care:'b-care', self:'b-self', rival:'b-rival', war:'b-war', true_love:'b-true_love', grand:'b-grand'}; 
+        const endingNames = {
+            care: 'I お茶はふたり分',
+            self: 'II きみに言いたかったこと',
+            rival: 'III ちゃんと、俺を見てて',
+            prank: 'IV 笑ったほうの勝ち',
+            war: 'V 勝負はまた明日',
+            true_love: 'VI きみの隣で、続きを',
+            grand: 'VII また明日、十五日目'
+        };
         for(let key in mapping) {
-            if(b[key] || (key==='grand' && b.grand_finale)) {
-                document.getElementById(mapping[key]).style.opacity = '1';
-                document.getElementById(mapping[key]).style.color = '#d4af37';
+            const played = b[key] || (key==='grand' && b.grand_finale);
+            const unlocked = played || unlocks[key];
+            const label = document.getElementById(mapping[key]);
+
+            if (unlocked) {
+                label.innerText = endingNames[key];
+            }
+
+            if(played) {
+                label.style.opacity = '1';
+                label.style.color = '#d4af37';
             }
         }
     }
