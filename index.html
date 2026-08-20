@@ -505,7 +505,12 @@
 
         try {
             if (textIdx < textBuffer.length) {
-                await typeLine(textBuffer[textIdx++]);
+                const currentLine = textBuffer[textIdx];
+
+                await typeLine(currentLine);
+
+                textIdx++;
+
                 document.getElementById('click-prompt').style.visibility = 'visible';
             } else {
                 document.getElementById('click-prompt').style.visibility = 'hidden';
