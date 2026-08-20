@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ice & Ember: 14 Days Chronicle</title>
+    <title>The Magic Sticky Notes</title>
     <style>
         /* フォント整理: 汎用的な明朝体(Shippori Mincho)と、付箋用の手書き風(Klee One)のみに絞る */
         @import url('https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=Shippori+Mincho:wght@400;500&display=swap');
@@ -259,13 +259,13 @@
     <div id="sky"></div>
     
     <div id="intro" class="screen">
-        <img src="title.png" alt="Ice & Ember">
+        <img src="title.png" alt="Magic Sticky Notes">
         <p>
-            中欧の峻厳たる山嶺。古き石造りの書庫で綴られる、二人の騎士による、すれ違いと共犯の14日間。
+        夜の書庫番を任された副団長たち。¥n2人の秘密の2週間が今始まる＿！
         </p>
         <div style="display:flex; flex-direction: column; gap:15px; align-items: center; width: 100%;">
-            <button class="btn" onclick="initAudio(); startPrologue();">BEGIN</button>
-            <button class="btn" onclick="openCollection();">COLLECTION</button>
+            <button class="btn" onclick="initAudio(); startPrologue();">物語をはじめる</button>
+            <button class="btn" onclick="openCollection();">付箋コレクション</button>
             <button class="btn" onclick="openExtra();">INFORMATION</button>
         </div>
     </div>
@@ -287,11 +287,11 @@
 
     <div id="collection" class="screen">
         <h2>COLLECTION</h2>
-        <div class="sub-text">付箋をクリックして裏返すと、記録された反応を確認できます。</div>
+        <div class="sub-text">付箋をクリックして裏返すと、パーシヴァルの反応を確認できます。</div>
         
         <div style="display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; font-size: 0.9rem; color: #888;">
-            <span id="b-care" style="opacity:0.3;">Ⅰ 気遣い</span>
-            <span id="b-self" style="opacity:0.3;">Ⅱ 本心</span>
+            <span id="b-care" style="opacity:0.3;">End1 ずっと</span>
+            <span id="b-self" style="opacity:0.3;">End2 本心</span>
             <span id="b-rival" style="opacity:0.3;">Ⅲ 好敵手</span> 
             <span id="b-prank" style="opacity:0.3;">Ⅳ 悪戯</span>
             <span id="b-war" style="opacity:0.3;">Ⅴ 宿敵</span>
@@ -311,11 +311,9 @@
         <h2>INFORMATION</h2>
         <div class="content-box">
             <h3>Credits</h3>
-            <p>企画・制作：[貴公のお名前]<br>シナリオ：[執筆担当名]<br>システム：Gemini Library & Sovereign Perfection System</p>
+            <p>制作・シナリオ：ろかス<br>イラスト：</p>
             <h3>Feedback</h3>
-            <p>物語の感想をお待ちしております。<br>（ここにフォームのリンクなどを記載してください）</p>
-            <h3>Trivia</h3>
-            <p>書庫の温度は、パーシヴァルの魔力によって常に「古書に最適な温度」へ調整されている。<br>付箋の裏に書かれた文字は、特別な火（または情熱）で炙らなければ浮かび上がらない。</p>
+            <p>感想をお待ちしております。<br>https://marshmallow-qa.com/oj0afz3donoawsc</p>
         </div>
         <button class="btn" onclick="closeExtra();" style="max-width: 150px;">BACK</button>
     </div>
