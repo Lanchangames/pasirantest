@@ -434,6 +434,7 @@
     let lastSkipTime = 0;
     let isEndingMode = false;
     let isFinalDayReply = false;
+    let isAdvancing = false;
     let isPrankWar = false;
     let choiceMade = false;
     let currentRunNotes = [];
@@ -492,38 +493,48 @@
             return;
         }
 
+        if (isAdvancing) {
+            return;
+        }
+
         if (Date.now() - lastSkipTime < 200) {
             return;
         }
 
-        if (textIdx < textBuffer.length) {
-            await typeLine(textBuffer[textIdx++]);
-            document.getElementById('click-prompt').style.visibility = 'visible';
-        } else {
-            document.getElementById('click-prompt').style.visibility = 'hidden';
+        isAdvancing = true;
 
-            // DAY14だけは次の日が存在しないため、選択肢の反応(r)を
-            // その場で表示してからエンディングへ進む。
-            if (isFinalDayReply) {
-                isFinalDayReply = false;
-                day = 15;
-                document.getElementById('ui-panel').style.display = 'flex';
-                document.getElementById('choice-area').innerHTML =
-                    '<button class="btn" style="border-color:#d4af37; color:#d4af37;" onclick="prepareEpilogue()">エンディングへ</button>';
-                return;
-            }
-
-            if(!isEndingMode) {
-                document.getElementById('ui-panel').style.display = 'flex';
-
-                if (day === 0) {
-                    showOptions();
-                } else {
-                    showNotePrompt();
-                }
+        try {
+            if (textIdx < textBuffer.length) {
+                await typeLine(textBuffer[textIdx++]);
+                document.getElementById('click-prompt').style.visibility = 'visible';
             } else {
-                startEpilogue();
+                document.getElementById('click-prompt').style.visibility = 'hidden';
+
+                // DAY14だけは次の日が存在しないため、選択肢の反応(r)を
+                // その場で表示してからエンディングへ進む。
+                if (isFinalDayReply) {
+                    isFinalDayReply = false;
+                    day = 15;
+                    document.getElementById('ui-panel').style.display = 'flex';
+                    document.getElementById('choice-area').innerHTML =
+                        '<button class="btn" style="border-color:#d4af37; color:#d4af37;" onclick="prepareEpilogue()">エンディングへ</button>';
+                    return;
+                }
+
+                if(!isEndingMode) {
+                    document.getElementById('ui-panel').style.display = 'flex';
+
+                    if (day === 0) {
+                        showOptions();
+                    } else {
+                        showNotePrompt();
+                    }
+                } else {
+                    startEpilogue();
+                }
             }
+        } finally {
+            isAdvancing = false;
         }
     }
 
@@ -844,12 +855,75 @@
     function openExtra() { document.getElementById('intro').style.display = 'none'; document.getElementById('extra').style.display = 'flex'; }
     function closeExtra() { document.getElementById('extra').style.display = 'none'; document.getElementById('intro').style.display = 'flex'; }
 
+    function repairLegacyDay14Notes(all) {
+        const candidates = [];
+
+        if (typeof scenarios !== 'undefined' &&
+            scenarios[14] &&
+            Array.isArray(scenarios[14].o)) {
+            candidates.push(...scenarios[14].o);
+        }
+
+        if (typeof warScenarios !== 'undefined' &&
+            warScenarios[14] &&
+            Array.isArray(warScenarios[14].o)) {
+            candidates.push(...warScenarios[14].o);
+        }
+
+        candidates.push(
+            {
+                t: "『明日からも、お前とこうして話していたい』",
+                c: 'true',
+                r: "付箋の裏には、後から書き足された赤い文字がある。『明日だけの話にするな、ランスロット。話したい時は来い。俺もお前に会いに行く』。"
+            },
+            {
+                t: "最後の付箋をめくる",
+                c: 'grand',
+                r: "裏面には、見覚えのある赤い字で追伸が残されている。『見つけたな、ランスロット。次からは隠さず渡す。お前も、消さずに書け』。"
+            },
+            {
+                t: "『これからも、俺のことちゃんと見てて』",
+                c: 'rival',
+                r: "付箋の裏には『言われなくても見る。勝負があろうとなかろうと、お前が何をするかくらいな』と書かれている。"
+            },
+            {
+                t: "『これからも、本気で俺のこと見てて』",
+                c: 'rival',
+                r: "付箋の裏には『ああ。勝負があろうとなかろうと、お前が何をするかくらい見ている』と書かれている。"
+            }
+        );
+
+        return all.map(n => {
+            if (
+                n.d !== 14 ||
+                (typeof n.r === 'string' && n.r.trim() !== '')
+            ) {
+                return n;
+            }
+
+            const found = candidates.find(o => o.t === n.t);
+
+            if (!found) {
+                return n;
+            }
+
+            return {
+                ...n,
+                c: n.c || found.c,
+                r: found.r
+            };
+        });
+    }
+
     function showCollection() {
         const grid = document.getElementById('coll-grid'); grid.innerHTML = '';
         let all = JSON.parse(localStorage.getItem('lib_vFinal_S') || "[]");
 
         // 旧仕様で保存されたPROLOGUEの固定進行ボタンを除去
         all = all.filter(n => n.d !== 0);
+
+        // 旧仕様で裏面が空白のDAY14付箋を、現在のシナリオ内容から補完
+        all = repairLegacyDay14Notes(all);
 
         // 除去後の状態を保存し直す
         localStorage.setItem('lib_vFinal_S', JSON.stringify(all));
