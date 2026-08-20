@@ -428,12 +428,51 @@
         const data = (isPrankWar && day >= 8) ? warScenarios[day] : scenarios[day];
         let opts = [...data.o].sort(() => Math.random() - 0.5); 
         
-        if (!isPrankWar && day >= 10 && day < 14 && affection >= 90) {
-            const golds = { 10:"(氷の指輪を贈る)", 11:"(氷の首飾りを贈る)", 12:"(二人の氷像を贈る)", 13:"(誓約の氷を贈る)" };
-            opts.push({t:golds[day], c:'true', r:"メモ：『……大切にする。失くしたりはしない』"});
-        } else if (!isPrankWar && day === 14 && isAllBadgesEarned()) {
-            opts.push({t:"明日の約束を誓う", c:'grand', r:""});
+// DAY10〜13：黄金の付箋
+if (
+    !isPrankWar &&
+    day >= 10 &&
+    day < 14 &&
+    affection >= 90 &&
+    getSeenBadgeCount() >= 2
+) {
+    const golds = {
+        10: {
+            t: "『お前とこうして話す時間、好きだよ』",
+            c: 'true',
+            r: "赤い付箋に『……俺も嫌いではない。貴公が余計なことさえ言わなければな』とある。最後の一言までなければ素直なのに。"
+        },
+        11: {
+            t: "『お前が相棒でよかったと思ってる』",
+            c: 'true',
+            r: "しばらく書き直した跡の後に、『俺もだ。貴公ほど手の掛かる相棒も他にいないがな』と残されていた。"
+        },
+        12: {
+            t: "『このやり取りが終わるの、少し寂しい』",
+            c: 'true',
+            r: "赤い付箋には短く『……俺もだ』。言い訳も茶化しも、その後には続いていなかった。"
+        },
+        13: {
+            t: "『任務が終わっても、こうして話していたい』",
+            c: 'true',
+            r: "『ならばそうすればいい』とある。その下に少し間を空けて、『付箋でなくとも構わん』と追記されていた。"
         }
+    };
+
+    opts.push(golds[day]);
+}
+        } else // DAY14：黄金ルート最終選択肢
+if (
+    !isPrankWar &&
+    day === 14 &&
+    scores.true >= 1
+) {
+    opts.push({
+        t:"『明日からも、お前とこうして話していたい』",
+        c:'true',
+        r:""
+    });
+}
 
         opts.forEach(o => {
             const b = document.createElement('button');
