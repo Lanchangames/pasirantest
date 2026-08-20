@@ -209,13 +209,9 @@
 
         /* コレクションのグリッド */
         .coll-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; width: 100%; margin-top: 20px; }
-        .coll-note { height: 160px; position: relative; cursor: pointer; transition: transform 0.4s; transform-style: preserve-3d; }
+        .coll-note {height: 160px;position: relative;cursor: pointer;transition: transform 0.4s;  transform-style: preserve-3d;  -webkit-transform-style: preserve-3d;}
         .coll-note.flipped { transform: rotateY(180deg); }
-        .coll-note-front, .coll-note-back { 
-            position: absolute; inset: 0; padding: 15px; backface-visibility: hidden; 
-            border-radius: 0; display: flex; flex-direction: column; justify-content: space-between; 
-            box-shadow: 2px 4px 8px rgba(0,0,0,0.3); text-align: left; 
-        }
+        .coll-note-front, .coll-note-back { position: absolute; inset: 0;padding: 15px; backface-visibility: hidden;-webkit-backface-visibility: hidden;border-radius: 0;display: flex;flex-direction: column;justify-content: space-between;  box-shadow: 2px 4px 8px rgba(0,0,0,0.3); text-align: left; }
         .coll-note-front { 
             font-family: 'Klee One', cursive; /* フォントを Klee One に変更 */
             font-weight: 400;
