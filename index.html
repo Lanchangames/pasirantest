@@ -378,7 +378,7 @@
         <div style="display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; font-size: 0.9rem; color: #888;">
             <span id="b-care" style="opacity:0.3;">I 明日も、この場所で</span>
             <span id="b-self" style="opacity:0.3;">II 言葉にしなかったこと</span>
-            <span id="b-rival" style="opacity:0.3;">III 君だけには負けられない</span>
+            <span id="b-rival" style="opacity:0.3;">III 目を逸らさないで</span>
             <span id="b-prank" style="opacity:0.3;">IV 笑ったほうの負け</span>
             <span id="b-war" style="opacity:0.3;">V 決着は、まだ先に</span>
             <span id="b-true_love" style="opacity:0.3;">VI 消えない言葉</span>
@@ -433,13 +433,14 @@
     let skipRequested = false;
     let lastSkipTime = 0;
     let isEndingMode = false;
+    let isFinalDayReply = false;
     let isPrankWar = false;
     let choiceMade = false;
     let currentRunNotes = [];
     let lastActionTrace = "";
 
     function startPrologue() { 
-        day = 0; isEndingMode = false; choiceMade = false; textIdx = 0;
+        day = 0; isEndingMode = false; isFinalDayReply = false; choiceMade = false; textIdx = 0;
         document.getElementById('intro').style.display = 'none';
         document.getElementById('game').style.display = 'flex';
         render();
@@ -500,6 +501,17 @@
             document.getElementById('click-prompt').style.visibility = 'visible';
         } else {
             document.getElementById('click-prompt').style.visibility = 'hidden';
+
+            // DAY14だけは次の日が存在しないため、選択肢の反応(r)を
+            // その場で表示してからエンディングへ進む。
+            if (isFinalDayReply) {
+                isFinalDayReply = false;
+                day = 15;
+                document.getElementById('ui-panel').style.display = 'flex';
+                document.getElementById('choice-area').innerHTML =
+                    '<button class="btn" style="border-color:#d4af37; color:#d4af37;" onclick="prepareEpilogue()">エンディングへ</button>';
+                return;
+            }
 
             if(!isEndingMode) {
                 document.getElementById('ui-panel').style.display = 'flex';
@@ -566,7 +578,7 @@
     }
 
     document.getElementById('desk-trigger').onclick = () => {
-        if((!choiceMade || isEndingMode) && document.getElementById('ui-panel').style.display !== 'flex') advance();
+        if((!choiceMade || isEndingMode || isFinalDayReply) && document.getElementById('ui-panel').style.display !== 'flex') advance();
     };
 
     function showOptions() {
@@ -587,22 +599,22 @@
                 10: {
                     t: "『お前とこうして話す時間、好きだよ』",
                     c: 'true',
-                    r: "二枚の付箋が風もないのに隣り合う。赤い付箋には『……俺も嫌いではない。貴公が余計なことさえ言わなければな』。"
+                    r: "二枚の付箋が風もないのに隣り合う。赤い付箋には『俺も好きだが？　お前が今さら何を驚いている』。紙を手に取ると、ほんの少しだけ暖かい。"
                 },
                 11: {
                     t: "『お前が相棒でよかったと思ってる』",
                     c: 'true',
-                    r: "付箋の上に氷と炎の小さな紋様が並んで浮かぶ。書き直した跡の後には『俺もだ。貴公ほど手の掛かる相棒も他にいないがな』。"
+                    r: "付箋の上に氷と炎の小さな紋様が並んで浮かぶ。赤い付箋には『俺もだ。お前だからここまで任せられる』と、迷いのない字で書かれている。"
                 },
                 12: {
                     t: "『このやり取りが終わるの、少し寂しい』",
                     c: 'true',
-                    r: "付箋の端がなかなか机から剥がれない。赤い付箋には短く『……俺もだ』。その後には何も続いていない。"
+                    r: "付箋の端がなかなか机から剥がれない。赤い付箋には『……俺もだ。なら、任務が終わったからといって終わらせる必要もないだろう』と書かれている。"
                 },
                 13: {
                     t: "『任務が終わっても、こうして話していたい』",
                     c: 'true',
-                    r: "二枚の付箋が並んだまま、しっかり机に貼り付いている。『ならばそうすればいい』。その下には『付箋でなくとも構わん』。"
+                    r: "二枚の付箋が並んだまま、しっかり机に貼り付いている。赤い付箋には『ならばそうすればいい。付箋でなくても構わん。俺もお前と話していたい』と書かれている。"
                 }
             };
 
@@ -618,7 +630,7 @@
             opts.push({
                 t: "『明日からも、お前とこうして話していたい』",
                 c: 'true',
-                r: "付箋の裏には、後から書き足された赤い文字がある。『明日だけの話にするな、ランスロット。これからも話したい時は普通に来い。俺もそうする』。"
+                r: "付箋の裏には、後から書き足された赤い文字がある。『明日だけの話にするな、ランスロット。話したい時は来い。俺もお前に会いに行く』。"
             });
         }
         
@@ -670,6 +682,19 @@
             });
         }
 
+        // DAY14は「翌日」がないので、rをTRACEへ送るだけでは一度も表示されない。
+        // 選んだ付箋へのパーシヴァルの返事を、その場で一度表示してから終了する。
+        if (day === 14) {
+            setTimeout(() => {
+                isFinalDayReply = true;
+                textBuffer = [o.r];
+                textIdx = 0;
+                document.getElementById('text-box').innerHTML = "";
+                advance();
+            }, 150);
+            return;
+        }
+
         setTimeout(() => {
             day++;
 
@@ -687,7 +712,7 @@
         const endingNames = {
             care: "I 明日も、この場所で",
             self: "II 言葉にしなかったこと",
-            rival: "III 君だけには負けられない",
+            rival: "III 目を逸らさないで",
             prank: "IV 笑ったほうの負け",
             war: "V 決着は、まだ先に",
             true_love: "VI 消えない言葉",
