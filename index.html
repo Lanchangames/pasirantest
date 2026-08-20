@@ -472,6 +472,7 @@
     let isEndingMode = false;
     let isFinalDayReply = false;
     let isAdvancing = false;
+    let isDayTransitioning = false;
     let isPrankWar = false;
     let choiceMade = false;
     let currentRunNotes = [];
@@ -486,6 +487,7 @@
 
     function render() {
         if (day > 14) return;
+        isDayTransitioning = true;
         choiceMade = false;
         document.getElementById('ui-panel').style.display = 'none';
         document.getElementById('text-box').innerHTML = "";
@@ -502,6 +504,7 @@
             
             textBuffer = [...data.s.map(l => l.replace("{TRACE}", trace)), ...data.d];
             textIdx = 0;
+            isDayTransitioning = false;
             advance();
         });
     }
@@ -524,6 +527,10 @@
     }
 
     async function advance() {
+        if (isDayTransitioning) {
+            return;
+        }
+
         if (isTyping) {
             skipRequested = true;
             lastSkipTime = Date.now();
