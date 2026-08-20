@@ -124,6 +124,11 @@
             border-radius: 0; box-shadow: none; text-align: center; letter-spacing: 0.1em;
         }
         .btn:hover { background: rgba(255,255,255,0.05); border-color: #666; }
+        
+        #note-prompt-btn {
+            grid-column: 1 / -1;
+            justify-self: center;
+        }
 
         /* タイトル画面の付箋ボタン */
         .title-note-btn {
@@ -209,15 +214,19 @@
 
         /* コレクションのグリッド */
         .coll-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; width: 100%; margin-top: 20px; }
-        .coll-note {height: 160px;position: relative;cursor: pointer;transition: transform 0.4s;  transform-style: preserve-3d;  -webkit-transform-style: preserve-3d;}
-        .coll-note.flipped { transform: rotateY(180deg); }
-        .coll-note-front, .coll-note-back { position: absolute; inset: 0;padding: 15px; backface-visibility: hidden;-webkit-backface-visibility: hidden;border-radius: 0;display: flex;flex-direction: column;justify-content: space-between;  box-shadow: 2px 4px 8px rgba(0,0,0,0.3); text-align: left; }
+        .coll-note { height: 160px; position: relative; cursor: pointer; transition: transform 0.4s; transform-style: preserve-3d; -webkit-transform-style: preserve-3d; }
+        .coll-note.flipped { transform: rotateY(180deg); -webkit-transform: rotateY(180deg); }
+        .coll-note-front, .coll-note-back { 
+            position: absolute; inset: 0; padding: 15px; backface-visibility: hidden; -webkit-backface-visibility: hidden; 
+            border-radius: 0; display: flex; flex-direction: column; justify-content: space-between; 
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.3); text-align: left; 
+        }
         .coll-note-front { 
             font-family: 'Klee One', cursive; /* フォントを Klee One に変更 */
             font-weight: 400;
             font-size: 1rem; color: #333; 
         }
-        .coll-note-back { transform: rotateY(180deg); background: #222 !important; color: #eee; font-family: 'Shippori Mincho', serif; font-size: 0.9rem; border: 1px solid #444; overflow-y: auto; overflow-x: hidden; box-sizing: border-box; overflow-wrap: anywhere;}
+        .coll-note-back { transform: rotateY(180deg); -webkit-transform: rotateY(180deg); background: #222 !important; color: #eee; font-family: 'Shippori Mincho', serif; font-size: 0.9rem; border: 1px solid #444; overflow-y: auto; overflow-x: hidden; box-sizing: border-box; overflow-wrap: anywhere;}
 
         /* =========================================
            スマホ向けレイアウト調整
@@ -370,6 +379,7 @@
     let textIdx = 0;
     let isTyping = false;
     let skipRequested = false;
+    let lastSkipTime = 0;
     let isEndingMode = false;
     let isPrankWar = false;
     let choiceMade = false;
@@ -423,7 +433,16 @@
     }
 
     async function advance() {
-        if (isTyping) { skipRequested = true; return; }
+        if (isTyping) {
+            skipRequested = true;
+            lastSkipTime = Date.now();
+            return;
+        }
+
+        if (Date.now() - lastSkipTime < 200) {
+            return;
+        }
+
         if (textIdx < textBuffer.length) {
             await typeLine(textBuffer[textIdx++]);
             document.getElementById('click-prompt').style.visibility = 'visible';
@@ -468,15 +487,28 @@
     }
 
     async function typeLine(line) {
-        isTyping = true; skipRequested = false;
-        const box = document.getElementById('text-box'); box.innerHTML = "";
+        isTyping = true;
+        skipRequested = false;
+
+        document.getElementById('click-prompt').style.visibility = 'hidden';
+
+        const box = document.getElementById('text-box');
+        box.innerHTML = "";
+
         playPageSound();
+
         for (let char of line) {
-            if (skipRequested) { box.innerHTML = line; break; }
+            if (skipRequested) {
+                box.innerHTML = line;
+                break;
+            }
+
             box.innerHTML += char;
             await new Promise(r => setTimeout(r, 15));
         }
-        isTyping = false; skipRequested = false;
+
+        isTyping = false;
+        skipRequested = false;
     }
 
     document.getElementById('desk-trigger').onclick = () => {
@@ -681,11 +713,22 @@
 
     function saveRun(eid) {
         let all = JSON.parse(localStorage.getItem('lib_vFinal_S') || "[]");
-        currentRunNotes.forEach(n => { if (!all.some(x => x.t === n.t)) all.push(n); });
+        currentRunNotes.forEach(n => {
+            const index = all.findIndex(x => x.t === n.t);
+            if (index >= 0) {
+                all[index] = n;
+            } else {
+                all.push(n);
+            }
+        });
         localStorage.setItem('lib_vFinal_S', JSON.stringify(all));
+        
         const b = JSON.parse(localStorage.getItem('badge_vFinal_S') || '{}');
-        if (eid === "grand_finale" || eid === "grand") b.grand = true;
-        else b[eid] = true;
+        if (eid === "grand_finale" || eid === "grand") {
+            b.grand = true;
+        } else {
+            b[eid] = true;
+        }
         localStorage.setItem('badge_vFinal_S', JSON.stringify(b));
     }
 
