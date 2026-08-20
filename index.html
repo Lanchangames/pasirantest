@@ -200,12 +200,12 @@
         }
 
         /* Collection & Extra 画面 */
-        #collection, #extra { 
+        #collection, #extra, #memories, #ending-collection, #ending-viewer { 
             background: var(--bg-dark); overflow-y: auto; padding: 60px 20px 100px 20px; 
             z-index: 6000; display: none; flex-direction: column; align-items: flex-start; 
             max-width: 800px; margin: 0 auto; width: 100%;
         }
-        #collection {
+        #collection, #memories, #ending-collection, #ending-viewer {
             left: 50%;
             transform: translateX(-50%);
         }
@@ -331,7 +331,7 @@
                 align-self: center; transform: rotate(0deg); 
             }
             
-            #collection, #extra { box-sizing: border-box; padding: 36px 20px 80px; }
+            #collection, #extra, #memories, #ending-collection, #ending-viewer { box-sizing: border-box; padding: 36px 20px 80px; }
             .coll-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
             .coll-note { height: 145px; }
         }
@@ -351,7 +351,7 @@
         </p>
         <div style="display:flex; flex-direction: column; gap:15px; align-items: center; width: 100%;">
             <button class="title-note-btn" onclick="initAudio(); startPrologue();">物語をはじめる</button>
-            <button class="title-note-btn" onclick="openCollection();">付箋コレクション</button>
+            <button class="title-note-btn" onclick="openMemories();">思い出</button>
             <button class="title-note-btn" onclick="openExtra();">INFORMATION</button>
         </div>
     </div>
@@ -368,6 +368,43 @@
         <div class="ui-panel" id="ui-panel">
             <div id="ui-msg"></div> 
             <div id="choice-area" class="choices"></div>
+        </div>
+    </div>
+
+    <div id="memories" class="screen">
+        <h2>MEMORIES</h2>
+        <div class="sub-text">これまでの二人の記録。</div>
+
+        <div style="display:flex; flex-direction:column; gap:15px; align-items:center; width:100%; margin-top:10px;">
+            <button class="title-note-btn" onclick="openCollection();">付箋コレクション</button>
+            <button class="title-note-btn" onclick="openEndingCollection();">エンディング集</button>
+        </div>
+
+        <div id="memory-key-count" style="width:100%; text-align:center; margin-top:30px; color:#aaa;">🔑 × 0</div>
+
+        <div style="display:flex; gap:15px; margin-top:50px; width: 100%;">
+            <button class="btn" onclick="closeMemories();" style="max-width: 150px;">BACK</button>
+        </div>
+    </div>
+
+    <div id="ending-collection" class="screen">
+        <h2>ENDING COLLECTION</h2>
+        <div class="sub-text">一度見たエンディングを振り返れます。未解放のエンディングにはヒントがあります。</div>
+        <div id="ending-key-count" style="width:100%; text-align:right; margin-bottom:20px; color:#aaa;">🔑 × 0</div>
+
+        <div id="ending-list" class="content-box" style="margin-bottom:0;"></div>
+
+        <div style="display:flex; gap:15px; margin-top:50px; width: 100%;">
+            <button class="btn" onclick="closeEndingCollection();" style="max-width: 150px;">BACK</button>
+        </div>
+    </div>
+
+    <div id="ending-viewer" class="screen">
+        <h2 id="ending-viewer-title">ENDING</h2>
+        <div id="ending-viewer-content" class="content-box"></div>
+
+        <div style="display:flex; gap:15px; margin-top:20px; width: 100%;">
+            <button class="btn" onclick="closeEndingViewer();" style="max-width: 150px;">BACK</button>
         </div>
     </div>
 
@@ -810,10 +847,11 @@
     }
 
     function showFinalButtons() {
-        saveRun(currentEndingID);
+        const keyGranted = saveRun(currentEndingID);
 
         document.getElementById('ui-panel').style.display = 'flex';
         document.getElementById('choice-area').innerHTML = `
+            ${keyGranted ? '<div style="grid-column:1/-1; width:100%; text-align:center; margin-bottom:10px; color:#d4af37;">🔑 思い出の鍵を1つ手に入れた</div>' : ''}
             <button class="btn" onclick="location.reload()">スタート画面に戻る</button>
             <button class="btn" onclick="shareToX()">Xで報告する</button>
         `;
@@ -825,7 +863,107 @@
         return keys.filter(k => b[k]).length;
     }
 
+    const endingArchiveData = [
+        {
+            id: 'care',
+            number: 'I',
+            title: 'お茶はふたり分',
+            hint: 'パーシヴァルを気遣う言葉を多く残してみよう。',
+            keyUnlockable: true
+        },
+        {
+            id: 'self',
+            number: 'II',
+            title: 'きみに言いたかったこと',
+            hint: '仕事の話だけでなく、自分の気持ちを素直に伝えてみよう。',
+            keyUnlockable: true
+        },
+        {
+            id: 'rival',
+            number: 'III',
+            title: 'ちゃんと、俺を見てて',
+            hint: '彼に認めてもらいたい気持ちを、勝負や比較の言葉にしてみよう。',
+            keyUnlockable: true
+        },
+        {
+            id: 'prank',
+            number: 'IV',
+            title: '笑ったほうの勝ち',
+            hint: 'くだらなくて小さな悪戯を、何度も続けてみよう。',
+            keyUnlockable: true
+        },
+        {
+            id: 'war',
+            number: 'V',
+            title: '勝負はまた明日',
+            hint: '同じ種類の挑戦を、最初から徹底して続けると……？',
+            keyUnlockable: false
+        },
+        {
+            id: 'true_love',
+            number: 'VI',
+            title: 'きみの隣で、続きを',
+            hint: 'いくつかの思い出を集めたあと、特別な付箋に想いを託してみよう。',
+            keyUnlockable: false
+        },
+        {
+            id: 'grand',
+            number: 'VII',
+            title: 'また明日、十五日目',
+            hint: 'まだ見ていない物語を探してみよう。',
+            keyUnlockable: false
+        }
+    ];
+
+    function getEndingKeys() {
+        const value = parseInt(localStorage.getItem('ending_keys_vFinal_S') || '0', 10);
+        return Number.isFinite(value) ? value : 0;
+    }
+
+    function setEndingKeys(value) {
+        localStorage.setItem('ending_keys_vFinal_S', String(Math.max(0, value)));
+    }
+
+    function getEndingUnlocks() {
+        return JSON.parse(localStorage.getItem('ending_unlock_vFinal_S') || '{}');
+    }
+
+    function getPlayedEndings() {
+        const b = JSON.parse(localStorage.getItem('badge_vFinal_S') || '{}');
+
+        return {
+            care: !!b.care,
+            self: !!b.self,
+            rival: !!b.rival,
+            prank: !!b.prank,
+            war: !!b.war,
+            true_love: !!b.true_love,
+            grand: !!(b.grand || b.grand_finale)
+        };
+    }
+
+    function ensureEndingKeyMigration() {
+        if (localStorage.getItem('ending_key_migration_v1') === '1') return;
+
+        const played = getPlayedEndings();
+        const claimed = JSON.parse(localStorage.getItem('ending_key_claimed_vFinal_S') || '{}');
+        let keys = getEndingKeys();
+
+        endingArchiveData.forEach(end => {
+            if (played[end.id] && !claimed[end.id]) {
+                keys++;
+                claimed[end.id] = true;
+            }
+        });
+
+        setEndingKeys(keys);
+        localStorage.setItem('ending_key_claimed_vFinal_S', JSON.stringify(claimed));
+        localStorage.setItem('ending_key_migration_v1', '1');
+    }
+
     function saveRun(eid) {
+        ensureEndingKeyMigration();
+
         let all = JSON.parse(localStorage.getItem('lib_vFinal_S') || "[]");
         currentRunNotes.forEach(n => {
             const index = all.findIndex(x => x.t === n.t);
@@ -836,26 +974,220 @@
             }
         });
         localStorage.setItem('lib_vFinal_S', JSON.stringify(all));
-        
+
+        const normalizedEid = (eid === "grand_finale") ? "grand" : eid;
         const b = JSON.parse(localStorage.getItem('badge_vFinal_S') || '{}');
+        const alreadyPlayed = normalizedEid === "grand"
+            ? !!(b.grand || b.grand_finale)
+            : !!b[normalizedEid];
+
         if (eid === "grand_finale" || eid === "grand") {
             b.grand = true;
         } else {
             b[eid] = true;
         }
         localStorage.setItem('badge_vFinal_S', JSON.stringify(b));
+
+        let keyGranted = false;
+
+        if (!alreadyPlayed) {
+            const claimed = JSON.parse(localStorage.getItem('ending_key_claimed_vFinal_S') || '{}');
+
+            if (!claimed[normalizedEid]) {
+                setEndingKeys(getEndingKeys() + 1);
+                claimed[normalizedEid] = true;
+                localStorage.setItem('ending_key_claimed_vFinal_S', JSON.stringify(claimed));
+                keyGranted = true;
+            }
+        }
+
+        return keyGranted;
+    }
+
+    function updateMemoryKeyCount() {
+        ensureEndingKeyMigration();
+        const keys = getEndingKeys();
+
+        const memoryCount = document.getElementById('memory-key-count');
+        const endingCount = document.getElementById('ending-key-count');
+
+        if (memoryCount) memoryCount.innerText = `🔑 × ${keys}`;
+        if (endingCount) endingCount.innerText = `🔑 × ${keys}`;
+    }
+
+    function openMemories() {
+        ensureEndingKeyMigration();
+        document.getElementById('intro').style.display = 'none';
+        document.getElementById('game').style.display = 'none';
+        document.getElementById('memories').style.display = 'flex';
+        updateMemoryKeyCount();
+    }
+
+    function closeMemories() {
+        document.getElementById('memories').style.display = 'none';
+        document.getElementById('intro').style.display = 'flex';
+    }
+
+    function openEndingCollection() {
+        ensureEndingKeyMigration();
+        document.getElementById('memories').style.display = 'none';
+        document.getElementById('ending-collection').style.display = 'flex';
+        showEndingCollection();
+    }
+
+    function closeEndingCollection() {
+        document.getElementById('ending-collection').style.display = 'none';
+        document.getElementById('memories').style.display = 'flex';
+        updateMemoryKeyCount();
+    }
+
+    function showEndingCollection() {
+        ensureEndingKeyMigration();
+
+        const list = document.getElementById('ending-list');
+        const played = getPlayedEndings();
+        const unlocks = getEndingUnlocks();
+        const keys = getEndingKeys();
+
+        updateMemoryKeyCount();
+        list.innerHTML = '';
+
+        endingArchiveData.forEach(end => {
+            const isPlayed = !!played[end.id];
+            const isUnlocked = isPlayed || !!unlocks[end.id];
+
+            const card = document.createElement('div');
+            card.style.borderBottom = '1px dashed var(--border-subtle)';
+            card.style.padding = '20px 0';
+
+            const title = document.createElement('div');
+            title.style.fontSize = '1.05rem';
+            title.style.color = isUnlocked ? '#eee' : '#888';
+            title.style.marginBottom = '10px';
+            title.innerText = isUnlocked
+                ? `${end.number} ${end.title}`
+                : `${end.number} ？？？？？？？？`;
+
+            card.appendChild(title);
+
+            if (isUnlocked) {
+                const status = document.createElement('div');
+                status.style.fontSize = '0.85rem';
+                status.style.color = '#888';
+                status.style.marginBottom = '12px';
+                status.innerText = isPlayed ? '実プレイで解放済み' : '思い出の鍵で解放済み';
+                card.appendChild(status);
+
+                const viewButton = document.createElement('button');
+                viewButton.className = 'btn';
+                viewButton.style.maxWidth = '180px';
+                viewButton.innerText = 'エンディングを見る';
+                viewButton.onclick = () => openEndingViewer(end.id);
+                card.appendChild(viewButton);
+            } else {
+                const hint = document.createElement('div');
+                hint.style.fontSize = '0.9rem';
+                hint.style.color = '#aaa';
+                hint.style.lineHeight = '1.8';
+                hint.style.marginBottom = '12px';
+                hint.innerText = `Hint：${end.hint}`;
+                card.appendChild(hint);
+
+                if (end.keyUnlockable) {
+                    const unlockButton = document.createElement('button');
+                    unlockButton.className = 'btn';
+                    unlockButton.style.maxWidth = '220px';
+                    unlockButton.innerText = '🔑 鍵を使って解放';
+                    unlockButton.disabled = keys <= 0;
+                    unlockButton.onclick = () => unlockEndingWithKey(end.id);
+                    card.appendChild(unlockButton);
+
+                    if (keys <= 0) {
+                        const noKey = document.createElement('div');
+                        noKey.style.fontSize = '0.8rem';
+                        noKey.style.color = '#666';
+                        noKey.style.marginTop = '8px';
+                        noKey.innerText = '思い出の鍵を持っていません。';
+                        card.appendChild(noKey);
+                    }
+                } else {
+                    const playOnly = document.createElement('div');
+                    playOnly.style.fontSize = '0.85rem';
+                    playOnly.style.color = '#888';
+                    playOnly.innerText = '🔒 このENDは実際のプレイでのみ解放できます。';
+                    card.appendChild(playOnly);
+                }
+            }
+
+            list.appendChild(card);
+        });
+    }
+
+    function unlockEndingWithKey(eid) {
+        const end = endingArchiveData.find(x => x.id === eid);
+        if (!end || !end.keyUnlockable) return;
+
+        const played = getPlayedEndings();
+        const unlocks = getEndingUnlocks();
+
+        if (played[eid] || unlocks[eid]) return;
+
+        const keys = getEndingKeys();
+        if (keys <= 0) return;
+
+        if (!confirm(`思い出の鍵を1つ使って「${end.number} ${end.title}」を解放しますか？`)) return;
+
+        setEndingKeys(keys - 1);
+        unlocks[eid] = true;
+        localStorage.setItem('ending_unlock_vFinal_S', JSON.stringify(unlocks));
+
+        showEndingCollection();
+    }
+
+    function openEndingViewer(eid) {
+        const played = getPlayedEndings();
+        const unlocks = getEndingUnlocks();
+
+        if (!played[eid] && !unlocks[eid]) return;
+
+        const end = endingArchiveData.find(x => x.id === eid);
+        if (!end) return;
+
+        const lines = endingScripts[eid] || [];
+
+        document.getElementById('ending-collection').style.display = 'none';
+        document.getElementById('ending-viewer').style.display = 'flex';
+        document.getElementById('ending-viewer-title').innerText = `${end.number} ${end.title}`;
+
+        const content = document.getElementById('ending-viewer-content');
+        content.innerHTML = '';
+
+        lines.forEach(line => {
+            const p = document.createElement('p');
+            p.style.margin = '0 0 1.4em 0';
+            p.style.whiteSpace = 'pre-wrap';
+            p.textContent = line;
+            content.appendChild(p);
+        });
+    }
+
+    function closeEndingViewer() {
+        document.getElementById('ending-viewer').style.display = 'none';
+        document.getElementById('ending-collection').style.display = 'flex';
+        showEndingCollection();
     }
 
     function openCollection() { 
         document.getElementById('intro').style.display = 'none';
         document.getElementById('game').style.display = 'none';
+        document.getElementById('memories').style.display = 'none';
         document.getElementById('collection').style.display = 'flex';
         showCollection();
     }
     function closeCollection() { 
         document.getElementById('collection').style.display = 'none'; 
-        if(day > 14) { location.reload(); }
-        else { document.getElementById('intro').style.display = 'flex'; }
+        document.getElementById('memories').style.display = 'flex';
+        updateMemoryKeyCount();
     }
     function openExtra() { document.getElementById('intro').style.display = 'none'; document.getElementById('extra').style.display = 'flex'; }
     function closeExtra() { document.getElementById('extra').style.display = 'none'; document.getElementById('intro').style.display = 'flex'; }
