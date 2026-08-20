@@ -124,7 +124,30 @@
             border-radius: 0; box-shadow: none; text-align: center; letter-spacing: 0.1em;
         }
         .btn:hover { background: rgba(255,255,255,0.05); border-color: #666; }
-        
+
+        /* タイトル画面の付箋ボタン */
+        .title-note-btn {
+            font-family: 'Klee One', cursive;
+            background-color: var(--note-base);
+            color: #333;
+            border: none;
+            border-radius: 0;
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.2);
+            width: 92%;
+            max-width: 320px;
+            min-height: 92px;
+            height: auto;
+            padding: 18px 20px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+        }
+        .title-note-btn:nth-child(1), .title-note-btn:nth-child(3) { transform: rotate(-1deg); }
+        .title-note-btn:nth-child(2) { transform: rotate(1deg); }
+        .title-note-btn:hover { transform: scale(1.02) rotate(0deg); box-shadow: 2px 6px 12px rgba(0,0,0,0.3); }
+
         /* 選択肢の付箋：このゲームの主役 */
         .sticky-note {
             width: 100%; max-width: 180px; aspect-ratio: 1 / 1; 
@@ -193,7 +216,7 @@
             font-weight: 400;
             font-size: 1rem; color: #333; 
         }
-        .coll-note-back { transform: rotateY(180deg); background: #222 !important; color: #eee; font-family: 'Shippori Mincho', serif; font-size: 0.9rem; border: 1px solid #444;}
+        .coll-note-back { transform: rotateY(180deg); background: #222 !important; color: #eee; font-family: 'Shippori Mincho', serif; font-size: 0.9rem; border: 1px solid #444; overflow-y: auto; overflow-x: hidden; box-sizing: border-box; overflow-wrap: anywhere;}
 
         /* =========================================
            スマホ向けレイアウト調整
@@ -265,9 +288,9 @@
             2人の秘密の2週間が今始まる――！
         </p>
         <div style="display:flex; flex-direction: column; gap:15px; align-items: center; width: 100%;">
-            <button class="btn" onclick="initAudio(); startPrologue();">物語をはじめる</button>
-            <button class="btn" onclick="openCollection();">付箋コレクション</button>
-            <button class="btn" onclick="openExtra();">INFORMATION</button>
+            <button class="title-note-btn" onclick="initAudio(); startPrologue();">物語をはじめる</button>
+            <button class="title-note-btn" onclick="openCollection();">付箋コレクション</button>
+            <button class="title-note-btn" onclick="openExtra();">INFORMATION</button>
         </div>
     </div>
 
@@ -407,11 +430,45 @@
         } else {
             if(!isEndingMode) {
                 document.getElementById('ui-panel').style.display = 'flex';
-                showOptions();
+
+                if (day === 0) {
+                    showOptions();
+                } else {
+                    showNotePrompt();
+                }
             } else {
                 startEpilogue();
             }
         }
+    }
+
+    function showNotePrompt() {
+        const area = document.getElementById('choice-area');
+
+        let label = "今日は付箋に何を書こうか";
+
+        if (isPrankWar) {
+            if (day === 14) {
+                label = "最後の勝負、どう返そうか";
+            } else {
+                label = "この勝負、どう返そうか";
+            }
+        } else if (day === 8) {
+            label = "さて、何て返そうか";
+        } else if (day >= 9 && day < 14) {
+            label = "今日は何を書こうか";
+        } else if (day === 14) {
+            label = "最後の付箋に何を書こうか";
+        }
+
+        area.innerHTML = `
+            <button class="btn" id="note-prompt-btn">${label}</button>
+        `;
+
+        document.getElementById('note-prompt-btn').onclick = (e) => {
+            e.stopPropagation();
+            showOptions();
+        };
     }
 
     async function typeLine(line) {
@@ -445,27 +502,27 @@
             getSeenBadgeCount() >= 2
         ) {
             const golds = {
-                10: {
-                    t: "『お前とこうして話す時間、好きだよ』",
-                    c: 'true',
-                    r: "赤い付箋に『……俺も嫌いではない。貴公が余計なことさえ言わなければな』とある。最後の一言までなければ素直なのに。"
-                },
-                11: {
-                    t: "『お前が相棒でよかったと思ってる』",
-                    c: 'true',
-                    r: "しばらく書き直した跡の後に、『俺もだ。貴公ほど手の掛かる相棒も他にいないがな』と残されていた。"
-                },
-                12: {
-                    t: "『このやり取りが終わるの、少し寂しい』",
-                    c: 'true',
-                    r: "赤い付箋には短く『……俺もだ』。言い訳も茶化しも、その後には続いていなかった。"
-                },
-                13: {
-                    t: "『任務が終わっても、こうして話していたい』",
-                    c: 'true',
-                    r: "『ならばそうすればいい』とある。その下に少し間を空けて、『付箋でなくとも構わん』と追記されていた。"
-                }
-            };
+    10: {
+        t: "『お前とこうして話す時間、好きだよ』",
+        c: 'true',
+        r: "二枚の付箋が風もないのに隣り合う。赤い付箋には『……俺も嫌いではない。貴公が余計なことさえ言わなければな』。"
+    },
+    11: {
+        t: "『お前が相棒でよかったと思ってる』",
+        c: 'true',
+        r: "付箋の上に氷と炎の小さな紋様が並んで浮かぶ。書き直した跡の後には『俺もだ。貴公ほど手の掛かる相棒も他にいないがな』。"
+    },
+    12: {
+        t: "『このやり取りが終わるの、少し寂しい』",
+        c: 'true',
+        r: "付箋の端がなかなか机から剥がれない。赤い付箋には短く『……俺もだ』。その後には何も続いていない。"
+    },
+    13: {
+        t: "『任務が終わっても、こうして話していたい』",
+        c: 'true',
+        r: "二枚の付箋が並んだまま、しっかり机に貼り付いている。『ならばそうすればいい』。その下には『付箋でなくとも構わん』。"
+    }
+};
 
             opts.push(golds[day]);
         }
@@ -513,18 +570,33 @@
     function selectChoice(o) {
         if (choiceMade) return;
         choiceMade = true;
-        document.getElementById('ui-panel').style.display = 'none';
-        document.getElementById('text-box').innerHTML = ""; 
-        scores[o.c]++; affection += (o.c==='true'?25:10);
-        lastActionTrace = o.r;
-        currentRunNotes.push({ d:day, t:o.t, c:o.c, r:o.r });
 
-        setTimeout(() => { 
-            day++; 
-            if (day <= 14) render();
-            else {
+        document.getElementById('ui-panel').style.display = 'none';
+        document.getElementById('text-box').innerHTML = "";
+
+        // PROLOGUEは固定進行なので、選択結果として記録しない
+        if (day !== 0) {
+            scores[o.c]++;
+            affection += (o.c === 'true' ? 25 : 10);
+            lastActionTrace = o.r;
+
+            currentRunNotes.push({
+                d: day,
+                t: o.t,
+                c: o.c,
+                r: o.r
+            });
+        }
+
+        setTimeout(() => {
+            day++;
+
+            if (day <= 14) {
+                render();
+            } else {
                 document.getElementById('ui-panel').style.display = 'flex';
-                document.getElementById('choice-area').innerHTML = '<button class="btn" style="border-color:#d4af37; color:#d4af37;" onclick="prepareEpilogue()">エンディングへ</button>';
+                document.getElementById('choice-area').innerHTML =
+                    '<button class="btn" style="border-color:#d4af37; color:#d4af37;" onclick="prepareEpilogue()">エンディングへ</button>';
             }
         }, 150);
     }
@@ -612,7 +684,14 @@
 
     function showCollection() {
         const grid = document.getElementById('coll-grid'); grid.innerHTML = '';
-        const all = JSON.parse(localStorage.getItem('lib_vFinal_S') || "[]");
+        let all = JSON.parse(localStorage.getItem('lib_vFinal_S') || "[]");
+
+        // 旧仕様で保存されたPROLOGUEの固定進行ボタンを除去
+        all = all.filter(n => n.d !== 0);
+
+        // 除去後の状態を保存し直す
+        localStorage.setItem('lib_vFinal_S', JSON.stringify(all));
+
         if (all.length === 0) grid.innerHTML = '<div style="grid-column: 1/-1; padding: 20px; color: #666;">記録がありません。</div>';
         else {
             all.sort((a,b) => a.d - b.d).forEach((n, idx) => {
