@@ -205,6 +205,10 @@
             z-index: 6000; display: none; flex-direction: column; align-items: flex-start; 
             max-width: 800px; margin: 0 auto; width: 100%;
         }
+        #collection {
+            left: 50%;
+            transform: translateX(-50%);
+        }
         
         h2 { font-weight: normal; font-size: 1.5rem; letter-spacing: 0.1em; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; width: 100%; text-align: left; margin-top: 0;}
         .sub-text { font-size: 0.9rem; color: #888; margin-bottom: 30px; text-align: left; width: 100%;}
@@ -214,19 +218,67 @@
 
         /* コレクションのグリッド */
         .coll-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; width: 100%; margin-top: 20px; }
-        .coll-note { height: 160px; position: relative; cursor: pointer; transition: transform 0.4s; transform-style: preserve-3d; -webkit-transform-style: preserve-3d; }
-        .coll-note.flipped { transform: rotateY(180deg); -webkit-transform: rotateY(180deg); }
-        .coll-note-front, .coll-note-back { 
-            position: absolute; inset: 0; padding: 15px; backface-visibility: hidden; -webkit-backface-visibility: hidden; 
-            border-radius: 0; display: flex; flex-direction: column; justify-content: space-between; 
-            box-shadow: 2px 4px 8px rgba(0,0,0,0.3); text-align: left; 
+        .coll-note {
+            height: 160px;
+            position: relative;
+            cursor: pointer;
+            perspective: 1000px;
         }
-        .coll-note-front { 
+
+        .coll-note-front,
+        .coll-note-back {
+            position: absolute;
+            inset: 0;
+            padding: 15px;
+
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+
+            transition: transform 0.4s ease;
+            -webkit-transition: -webkit-transform 0.4s ease;
+
+            border-radius: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.3);
+            text-align: left;
+            box-sizing: border-box;
+        }
+
+        .coll-note-front {
+            transform: rotateY(0deg);
+            -webkit-transform: rotateY(0deg);
+
             font-family: 'Klee One', cursive; /* フォントを Klee One に変更 */
             font-weight: 400;
-            font-size: 1rem; color: #333; 
+            font-size: 1rem;
+            color: #333;
         }
-        .coll-note-back { transform: rotateY(180deg); -webkit-transform: rotateY(180deg); background: #222 !important; color: #eee; font-family: 'Shippori Mincho', serif; font-size: 0.9rem; border: 1px solid #444; overflow-y: auto; overflow-x: hidden; box-sizing: border-box; overflow-wrap: anywhere;}
+
+        .coll-note-back {
+            transform: rotateY(180deg);
+            -webkit-transform: rotateY(180deg);
+
+            background: #222 !important;
+            color: #eee;
+            font-family: 'Shippori Mincho', serif;
+            font-size: 0.9rem;
+            border: 1px solid #444;
+            overflow-y: auto;
+            overflow-x: hidden;
+            overflow-wrap: anywhere;
+        }
+
+        .coll-note.flipped .coll-note-front {
+            transform: rotateY(180deg);
+            -webkit-transform: rotateY(180deg);
+        }
+
+        .coll-note.flipped .coll-note-back {
+            transform: rotateY(0deg);
+            -webkit-transform: rotateY(0deg);
+        }
 
         /* =========================================
            スマホ向けレイアウト調整
@@ -447,6 +499,8 @@
             await typeLine(textBuffer[textIdx++]);
             document.getElementById('click-prompt').style.visibility = 'visible';
         } else {
+            document.getElementById('click-prompt').style.visibility = 'hidden';
+
             if(!isEndingMode) {
                 document.getElementById('ui-panel').style.display = 'flex';
 
