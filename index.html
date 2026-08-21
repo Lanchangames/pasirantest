@@ -351,9 +351,9 @@
         </p>
         <div style="display:flex; flex-direction: column; gap:15px; align-items: center; width: 100%;">
             <button class="title-note-btn" onclick="initAudio(); startPrologue();">物語をはじめる</button>
+            <button id="grand-home-btn" class="title-note-btn" onclick="initAudio(); startGrandFinale();" style="display:none; background-color:var(--note-gold); border:1px solid #d4af37;">15日目へ</button>
             <button class="title-note-btn" onclick="openMemories();">思い出</button>
             <button class="title-note-btn" onclick="openExtra();">INFORMATION</button>
-            <button id="grand-home-btn" class="title-note-btn" onclick="initAudio(); startGrandFinale();" style="display:none; background-color:var(--note-gold); border:1px solid #d4af37;">15日目へ</button>
         </div>
     </div>
 
@@ -397,6 +397,16 @@
 
         <div style="display:flex; gap:15px; margin-top:50px; width: 100%; justify-content:center;">
             <button class="btn" onclick="closeEndingCollection();" style="max-width: 150px;">BACK</button>
+        </div>
+    </div>
+
+    <div id="ending-unlock-modal" style="position:fixed; inset:0; background:rgba(18,18,18,0.9); z-index:7000; display:none; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
+        <div style="width:100%; max-width:420px; border:1px solid var(--border-subtle); background:var(--bg-dark); padding:30px 24px; box-sizing:border-box; text-align:center;">
+            <div id="ending-unlock-modal-text" style="line-height:1.9; margin-bottom:30px; color:#ddd;"></div>
+            <div style="display:flex; gap:15px; justify-content:center;">
+                <button class="btn" onclick="confirmEndingUnlock();" style="max-width:150px;">解放する</button>
+                <button class="btn" onclick="closeEndingUnlockModal();" style="max-width:150px;">やめる</button>
+            </div>
         </div>
     </div>
 
@@ -1102,13 +1112,6 @@
             card.appendChild(title);
 
             if (isUnlocked) {
-                const status = document.createElement('div');
-                status.style.fontSize = '0.85rem';
-                status.style.color = '#888';
-                status.style.marginBottom = '12px';
-                status.innerText = isPlayed ? '実プレイで解放済み' : '思い出の鍵で解放済み';
-                card.appendChild(status);
-
                 const viewButton = document.createElement('button');
                 viewButton.className = 'btn';
                 viewButton.style.maxWidth = '180px';
@@ -1154,6 +1157,8 @@
         });
     }
 
+    let pendingUnlockEndingID = "";
+
     function unlockEndingWithKey(eid) {
         const end = endingArchiveData.find(x => x.id === eid);
         if (!end || !end.keyUnlockable) return;
@@ -1166,12 +1171,44 @@
         const keys = getEndingKeys();
         if (keys <= 0) return;
 
-        if (!confirm(`思い出の鍵を1つ使って「${end.number} ${end.title}」を解放しますか？`)) return;
+        pendingUnlockEndingID = eid;
+        document.getElementById('ending-unlock-modal-text').innerText =
+            `思い出の鍵を1つ使って\n「${end.number} ${end.title}」を解放しますか？`;
+        document.getElementById('ending-unlock-modal').style.display = 'flex';
+    }
+
+    function closeEndingUnlockModal() {
+        pendingUnlockEndingID = "";
+        document.getElementById('ending-unlock-modal').style.display = 'none';
+    }
+
+    function confirmEndingUnlock() {
+        const eid = pendingUnlockEndingID;
+        const end = endingArchiveData.find(x => x.id === eid);
+        if (!end || !end.keyUnlockable) {
+            closeEndingUnlockModal();
+            return;
+        }
+
+        const played = getPlayedEndings();
+        const unlocks = getEndingUnlocks();
+
+        if (played[eid] || unlocks[eid]) {
+            closeEndingUnlockModal();
+            return;
+        }
+
+        const keys = getEndingKeys();
+        if (keys <= 0) {
+            closeEndingUnlockModal();
+            return;
+        }
 
         setEndingKeys(keys - 1);
         unlocks[eid] = true;
         localStorage.setItem('ending_unlock_vFinal_S', JSON.stringify(unlocks));
 
+        closeEndingUnlockModal();
         showEndingCollection();
     }
 
