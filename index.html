@@ -394,6 +394,7 @@
         <div id="ending-key-count" style="width:100%; text-align:right; margin-bottom:20px; color:#aaa;">🔑 × 0</div>
 
         <div id="ending-list" class="content-box" style="margin-bottom:0;"></div>
+        <div style="width:100%; text-align:center; margin-top:30px; color:#888; font-size:0.9rem;">すべてのエンディングを集めてトップ画面に戻ると……？</div>
 
         <div style="display:flex; gap:15px; margin-top:50px; width: 100%; justify-content:center;">
             <button class="btn" onclick="closeEndingCollection();" style="max-width: 150px;">BACK</button>
@@ -423,16 +424,6 @@
         <h2>COLLECTION</h2>
         <div class="sub-text">付箋をクリックして裏返すと、パーシヴァルの反応を確認できます。</div>
         
-        <div style="display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; font-size: 0.9rem; color: #888;">
-            <span id="b-care" style="opacity:0.3;">1. ？？？？？？？？</span>
-            <span id="b-self" style="opacity:0.3;">2. ？？？？？？？？</span>
-            <span id="b-rival" style="opacity:0.3;">3. ？？？？？？？？</span>
-            <span id="b-prank" style="opacity:0.3;">4. ？？？？？？？？</span>
-            <span id="b-war" style="opacity:0.3;">5. ？？？？？？？？</span>
-            <span id="b-true_love" style="opacity:0.3;">6. ？？？？？？？？</span>
-            <span id="b-grand" style="opacity:0.3;">？？？？？？？？</span>
-        </div>
-
         <div id="coll-grid" class="coll-grid"></div>
         
         <div style="display:flex; gap:15px; margin-top:50px; width: 100%; justify-content:center;">
@@ -938,7 +929,7 @@
             id: 'war',
             number: 'V',
             title: '勝負はまた明日',
-            hint: '同じ種類の挑戦を、最初から徹底して続けると……？',
+            hint: '最初の一週間、勝負を挑むような言葉を一度もぶらさず選び続けると……？',
             keyUnlockable: false
         },
         {
@@ -950,9 +941,9 @@
         },
         {
             id: 'grand',
-            number: 'VII',
+            number: '',
             title: 'また明日、十五日目',
-            hint: 'まだ見ていない物語を探してみよう。',
+            hint: '',
             keyUnlockable: false
         }
     ];
@@ -1095,7 +1086,7 @@
         updateMemoryKeyCount();
         list.innerHTML = '';
 
-        endingArchiveData.forEach(end => {
+        endingArchiveData.filter(end => end.id !== 'grand').forEach(end => {
             const isPlayed = !!played[end.id];
             const isUnlocked = isPlayed || !!unlocks[end.id];
 
@@ -1364,33 +1355,6 @@
                 note.onclick = () => { playPageSound(); note.classList.toggle('flipped'); };
                 grid.appendChild(note);
             });
-        }
-        
-        const b = JSON.parse(localStorage.getItem('badge_vFinal_S') || '{}');
-        const unlocks = getEndingUnlocks();
-        const mapping = {prank:'b-prank', care:'b-care', self:'b-self', rival:'b-rival', war:'b-war', true_love:'b-true_love', grand:'b-grand'}; 
-        const endingNames = {
-            care: 'I お茶はふたり分',
-            self: 'II きみに言いたかったこと',
-            rival: 'III ちゃんと、俺を見てて',
-            prank: 'IV 笑ったほうの勝ち',
-            war: 'V 勝負はまた明日',
-            true_love: 'VI きみの隣で、続きを',
-            grand: 'VII また明日、十五日目'
-        };
-        for(let key in mapping) {
-            const played = b[key] || (key==='grand' && b.grand_finale);
-            const unlocked = played || unlocks[key];
-            const label = document.getElementById(mapping[key]);
-
-            if (unlocked) {
-                label.innerText = endingNames[key];
-            }
-
-            if(played) {
-                label.style.opacity = '1';
-                label.style.color = '#d4af37';
-            }
         }
     }
 
