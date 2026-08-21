@@ -424,13 +424,13 @@
         <div class="sub-text">付箋をクリックして裏返すと、パーシヴァルの反応を確認できます。</div>
         
         <div style="display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; font-size: 0.9rem; color: #888;">
-            <span id="b-care" style="opacity:0.3;">I ？？？？？？？？</span>
-            <span id="b-self" style="opacity:0.3;">II ？？？？？？？？</span>
-            <span id="b-rival" style="opacity:0.3;">III ？？？？？？？？</span>
-            <span id="b-prank" style="opacity:0.3;">IV ？？？？？？？？</span>
-            <span id="b-war" style="opacity:0.3;">V ？？？？？？？？</span>
-            <span id="b-true_love" style="opacity:0.3;">VI ？？？？？？？？</span>
-            <span id="b-grand" style="opacity:0.3;">VII ？？？？？？？？</span>
+            <span id="b-care" style="opacity:0.3;">1. ？？？？？？？？</span>
+            <span id="b-self" style="opacity:0.3;">2. ？？？？？？？？</span>
+            <span id="b-rival" style="opacity:0.3;">3. ？？？？？？？？</span>
+            <span id="b-prank" style="opacity:0.3;">4. ？？？？？？？？</span>
+            <span id="b-war" style="opacity:0.3;">5. ？？？？？？？？</span>
+            <span id="b-true_love" style="opacity:0.3;">6. ？？？？？？？？</span>
+            <span id="b-grand" style="opacity:0.3;">？？？？？？？？</span>
         </div>
 
         <div id="coll-grid" class="coll-grid"></div>
@@ -442,10 +442,12 @@
 
     <div id="extra" class="screen">
         <h2>INFORMATION</h2>
+　　　　　<p>ランスロットが日誌に何を書いたのかゲーム上ではわかりませんが、<br>かなり真面目に業務のことを記していたと思います。</p>
+
         <div class="content-box">
-            <h3>Credits</h3>
+            <h3>クレジット</h3>
             <p>制作・シナリオ：ろかス<br>イラスト：</p>
-            <h3>Feedback</h3>
+            <h3>お問合せはこちら</h3>
             <p>
                 感想をお待ちしております。<br>
                 <a href="https://marshmallow-qa.com/oj0afz3donoawsc"
@@ -787,13 +789,13 @@
 
     function shareToX() {
         const endingNames = {
-            care: "I お茶はふたり分",
-            self: "II きみに言いたかったこと",
-            rival: "III ちゃんと、俺を見てて",
-            prank: "IV 笑ったほうの勝ち",
-            war: "V 勝負はまた明日",
-            true_love: "VI きみの隣で、続きを",
-            grand: "VII また明日、十五日目"
+            care: "1.お茶はふたり分",
+            self: "2.言いたかったこと",
+            rival: "3.俺を見てて",
+            prank: "4.笑ったほうの勝ち",
+            war: "5.勝負はまた明日",
+            true_love: "6.お前の隣で、続きを",
+            grand: "また明日、十五日目"
         };
 
         const endingName = endingNames[currentEndingID] || "";
