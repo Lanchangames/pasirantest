@@ -5,18 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Magic Sticky Notes</title>
     <style>
-        /* フォント整理: 汎用的な明朝体(Shippori Mincho)と、付箋用の手書き風(Klee One)のみに絞る */
+
+        
         @import url('https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=Shippori+Mincho:wght@400;500&display=swap');
         
         :root { 
-            --bg-dark: #121212;     /* 全体背景 */
-            --bg-panel: rgba(18, 18, 18, 0.85); /* 半透明パネル */
-            --paper: #f4f1ea;       /* 日誌の色：白すぎないアイボリー */
-            --text-main: #e0e0e0;   /* ベースの文字色 */
-            --text-paper: #2c2c2c;  /* 紙の上の文字色 */
+            --bg-dark: #121212;    
+            --bg-panel: rgba(18, 18, 18, 0.85); 
+            --paper: #f4f1ea;      
+            --text-main: #e0e0e0;  
+            --text-paper: #2c2c2c;  
             --border-subtle: #333333;
             
-            /* 付箋の色：通常時は淡い水色。Collectionでは各属性の色 */
             --note-base: #e6f2f5;
             --note-prank: #d9edf8;
             --note-care: #e2f0d9;
@@ -37,7 +37,6 @@
 
         #sky { position: fixed; inset: 0; z-index: -1; background: var(--bg-dark); }
         
-        /* 画面の基本レイアウト */
         .screen { 
             position: absolute; top: 0; left: 0; width: 100%; min-height: 100vh; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
@@ -46,11 +45,9 @@
         #intro { z-index: 1000; }
         #game { display: none; }
 
-        /* タイトル画面要素のPCベース設定 */
         #intro img { max-width: 600px; margin-bottom: 40px; opacity: 0.9; }
         #intro p { max-width: 600px; line-height: 2; font-size: 0.95rem; margin-bottom: 50px; color: #aaa; }
 
-        /* DAY切り替え：演出をゆっくりに修正 */
         #day-overlay { position: fixed; inset: 0; background: var(--bg-dark); z-index: 5000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.6s ease; }
         #day-overlay.active { opacity: 1; pointer-events: auto; }
         #day-overlay-text { font-family: 'Shippori Mincho', serif; font-size: 1.5rem; color: #888; letter-spacing: 0.2em; font-weight: normal; }
@@ -60,7 +57,6 @@
             font-size: 1.1rem; color: #888; margin-bottom: 10px; letter-spacing: 0.1em;
         }
 
-        /* 机と紙（日誌）：過剰なUI感をなくし、「一枚の記録」に見せる */
         .desk { 
             width: 100%; max-width: 700px; 
             background: transparent; border: none; box-shadow: none; 
@@ -68,7 +64,7 @@
         }
         .paper { 
             width: 100%; 
-            height: 400px; /* PC版の高さを400pxに戻す */
+            height: 400px; 
             background: var(--paper); 
             color: var(--text-paper); 
             padding: 40px 50px; 
@@ -86,7 +82,6 @@
             white-space: pre-wrap; 
         }
         
-        /* CLICKの点滅を控えめに */
         #click-prompt { 
             position: absolute; bottom: 20px; right: 40px; 
             font-size: 1rem; color: #aaa; 
@@ -98,7 +93,6 @@
         }
         @keyframes gentle-fade { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.8; } }
 
-        /* 選択肢（付箋）出現時のコンテナ：空間の連続性を高める */
         .ui-panel { 
             position: fixed; inset: 0; 
             background: var(--bg-panel); 
@@ -116,7 +110,6 @@
             width: 100%; max-width: 600px; 
         }
         
-        /* 通常ボタン：透明背景、細い線、角丸なし、アニメーション排除 */
         .btn { 
             background: transparent; border: 1px solid var(--border-subtle); color: var(--text-main); 
             padding: 12px 0; cursor: pointer; transition: background 0.2s, border-color 0.2s; 
@@ -130,7 +123,6 @@
             justify-self: center;
         }
 
-        /* タイトル画面の付箋ボタン */
         .title-note-btn {
             font-family: 'Klee One', cursive;
             background-color: var(--note-base);
@@ -153,7 +145,6 @@
         .title-note-btn:nth-child(2) { transform: rotate(1deg); }
         .title-note-btn:hover { transform: scale(1.02) rotate(0deg); box-shadow: 2px 6px 12px rgba(0,0,0,0.3); }
 
-        /* 選択肢の付箋：このゲームの主役 */
         .sticky-note {
             width: 100%; max-width: 180px; aspect-ratio: 1 / 1; 
             height: auto;
@@ -190,7 +181,6 @@
         .sticky-note:nth-child(3) { animation-delay: 0.3s; }
         .sticky-note:nth-child(4) { animation-delay: 0.4s; }
         
-        /* 黄金の付箋 */
         .sticky-note.gold-choice {
             grid-column: 1 / -1;
             width: 100%; max-width: 380px; aspect-ratio: auto; height: 100px;
@@ -199,7 +189,6 @@
             font-family: 'Shippori Mincho', serif; 
         }
 
-        /* Collection & Extra 画面 */
         #collection, #extra, #memories, #ending-collection, #ending-viewer { 
             background: var(--bg-dark); overflow-y: auto; padding: 60px 20px 100px 20px; 
             z-index: 6000; display: none; flex-direction: column; align-items: flex-start; 
@@ -216,7 +205,6 @@
         .content-box { width: 100%; text-align: left; line-height: 1.8; margin-bottom: 40px; font-size: 0.95rem; color: #ccc;}
         .content-box h3 { font-weight: normal; font-size: 1.1rem; color: #eee; margin-top: 30px; border-bottom: 1px dashed var(--border-subtle); padding-bottom: 5px;}
 
-        /* コレクションのグリッド */
         .coll-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; width: 100%; margin-top: 20px; }
         .coll-note {
             height: 160px;
@@ -250,7 +238,7 @@
             transform: rotateY(0deg);
             -webkit-transform: rotateY(0deg);
 
-            font-family: 'Klee One', cursive; /* フォントを Klee One に変更 */
+            font-family: 'Klee One', cursive; 
             font-weight: 400;
             font-size: 1rem;
             color: #333;
@@ -280,9 +268,6 @@
             -webkit-transform: rotateY(0deg);
         }
 
-        /* =========================================
-           スマホ向けレイアウト調整
-           ========================================= */
         @media (max-width: 600px) {
             .screen { padding: 40px 20px; }
             
@@ -305,7 +290,6 @@
                 padding: 32px 26px 46px; 
                 box-sizing: border-box; 
             }
-            /* スマホ版の本文フォント設定を元に戻す */
             #text-box { 
                 font-size: 0.95rem; 
                 line-height: 1.8; 
@@ -353,7 +337,7 @@
             <button class="title-note-btn" onclick="initAudio(); startPrologue();">物語をはじめる</button>
             <button id="grand-home-btn" class="title-note-btn" onclick="initAudio(); startGrandFinale();" style="display:none; background-color:var(--note-gold); border:1px solid #d4af37;">15日目へ</button>
             <button class="title-note-btn" onclick="openMemories();">思い出</button>
-            <button class="title-note-btn" onclick="openExtra();">INFORMATION</button>
+            <button class="title-note-btn" onclick="openExtra();">Infomation</button>
         </div>
     </div>
 
@@ -373,8 +357,8 @@
     </div>
 
     <div id="memories" class="screen">
-        <h2>MEMORIES</h2>
-        <div class="sub-text">これまでの二人の記録。</div>
+        <h2>思い出</h2>
+        <div class="sub-text">これまで選んだ付箋を確認できます。</div>
 
         <div style="display:flex; flex-direction:column; gap:15px; align-items:center; width:100%; margin-top:10px;">
             <button class="title-note-btn" onclick="openCollection();">付箋コレクション</button>
@@ -389,12 +373,12 @@
     </div>
 
     <div id="ending-collection" class="screen">
-        <h2>ENDING COLLECTION</h2>
-        <div class="sub-text">一度見たエンディングを振り返れます。未解放のエンディングにはヒントがあります。</div>
+        <h2>エンディング集</h2>
+        <div class="sub-text">一度見たエンディングを振り返ることができます。未解放のエンディングにはヒントがあります。</div>
         <div id="ending-key-count" style="width:100%; text-align:right; margin-bottom:20px; color:#aaa;">🔑 × 0</div>
 
         <div id="ending-list" class="content-box" style="margin-bottom:0;"></div>
-        <div style="width:100%; text-align:center; margin-top:30px; color:#888; font-size:0.9rem;">すべてのエンディングを集めてトップ画面に戻ると……？</div>
+        <div style="width:100%; text-align:center; margin-top:30px; color:#888; font-size:0.9rem;">すべてのエンディングを集めた後、トップ画面に戻ってみてください。</div>
 
         <div style="display:flex; gap:15px; margin-top:50px; width: 100%; justify-content:center;">
             <button class="btn" onclick="closeEndingCollection();" style="max-width: 150px;">BACK</button>
@@ -412,7 +396,7 @@
     </div>
 
     <div id="ending-viewer" class="screen">
-        <h2 id="ending-viewer-title">ENDING</h2>
+        <h2 id="ending-viewer-title">エンディング</h2>
         <div id="ending-viewer-content" class="content-box"></div>
 
         <div style="display:flex; gap:15px; margin-top:20px; width: 100%; justify-content:center;">
@@ -421,7 +405,7 @@
     </div>
 
     <div id="collection" class="screen">
-        <h2>COLLECTION</h2>
+        <h2>付箋コレクション</h2>
         <div class="sub-text">付箋をクリックして裏返すと、パーシヴァルの反応を確認できます。</div>
         
         <div id="coll-grid" class="coll-grid"></div>
@@ -432,7 +416,8 @@
     </div>
 
     <div id="extra" class="screen">
-        <h2>INFORMATION</h2>
+        <h2>Information</h2>
+        <p>非公式二次創作同人ゲームです。</p>
 　　　　　<p>ランスロットが日誌に何を書いたのかゲーム上ではわかりませんが、<br>かなり真面目に業務のことを記していたと思います。</p>
 
         <div class="content-box">
@@ -513,7 +498,6 @@
         });
     }
 
-    /* DAY切り替え演出をゆっくりに変更し、フェードアウト完了後にコールバックを実行 */
     function showDayOverlay(text, cb) {
         const ov = document.getElementById('day-overlay');
         document.getElementById('day-overlay-text').innerText = text;
@@ -563,8 +547,6 @@
             } else {
                 document.getElementById('click-prompt').style.visibility = 'hidden';
 
-                // DAY14だけは次の日が存在しないため、選択肢の反応(r)を
-                // その場で表示してからエンディングへ進む。
                 if (isFinalDayReply) {
                     isFinalDayReply = false;
                     day = 15;
@@ -651,7 +633,6 @@
         const data = (isPrankWar && day >= 8) ? warScenarios[day] : scenarios[day];
         let opts = [...data.o].sort(() => Math.random() - 0.5); 
         
-        // DAY10〜13：黄金の付箋
         if (
             !isPrankWar &&
             day >= 10 &&
@@ -685,7 +666,6 @@
             opts.push(golds[day]);
         }
 
-        // DAY14：黄金ルート最終選択肢
         if (
             !isPrankWar &&
             day === 14 &&
@@ -719,7 +699,6 @@
         document.getElementById('ui-panel').style.display = 'none';
         document.getElementById('text-box').innerHTML = "";
 
-        // PROLOGUEは固定進行なので、選択結果として記録しない
         if (day !== 0) {
             scores[o.c]++;
             affection += (o.c === 'true' ? 25 : 10);
@@ -733,8 +712,6 @@
             });
         }
 
-        // DAY14は「翌日」がないので、rをTRACEへ送るだけでは一度も表示されない。
-        // 選んだ付箋へのパーシヴァルの返事を、その場で一度表示してから終了する。
         if (day === 14) {
             let all = JSON.parse(localStorage.getItem('lib_vFinal_S') || "[]");
 
@@ -790,7 +767,7 @@
         };
 
         const endingName = endingNames[currentEndingID] || "";
-        const text = `「The Magic Sticky Notes」をプレイしました！\nEND：${endingName}`;
+        const text = `「The Magic Sticky Notes」をプレイしました！\nエンディング：${endingName}`;
         const url = location.origin + location.pathname;
 
         const shareUrl =
@@ -899,50 +876,50 @@
     const endingArchiveData = [
         {
             id: 'care',
-            number: 'I',
+            number: '１.',
             title: 'お茶はふたり分',
-            hint: 'パーシヴァルを気遣う言葉を多く残してみよう。',
+            hint: 'パーシヴァルを気遣う言葉を多く残してみてください。',
             keyUnlockable: true
         },
         {
             id: 'self',
-            number: 'II',
+            number: '２.',
             title: 'きみに言いたかったこと',
-            hint: '仕事の話だけでなく、自分の気持ちを素直に伝えてみよう。',
+            hint: '仕事の話だけでなく、自分の気持ちを素直に伝えてみてください。',
             keyUnlockable: true
         },
         {
             id: 'rival',
-            number: 'III',
+            number: '３.',
             title: 'ちゃんと、俺を見てて',
-            hint: '彼に認めてもらいたい気持ちを、勝負や比較の言葉にしてみよう。',
+            hint: 'パーシヴァルに認めてもらいたい気持ちを表してみてください。',
             keyUnlockable: true
         },
         {
             id: 'prank',
-            number: 'IV',
+            number: '４.',
             title: '笑ったほうの勝ち',
-            hint: 'くだらなくて小さな悪戯を、何度も続けてみよう。',
+            hint: 'くだらなくて小さな悪戯を、何度も続けてみてください。',
             keyUnlockable: true
         },
         {
             id: 'war',
-            number: 'V',
+            number: '５.',
             title: '勝負はまた明日',
-            hint: '最初の一週間、勝負を挑むような言葉を一度もぶらさず選び続けると……？',
+            hint: 'お互いが切磋琢磨し合えるような選択肢を1度も逃さず選び続けてください。付箋コレクションがヒントになるかも。',
             keyUnlockable: false
         },
         {
             id: 'true_love',
-            number: 'VI',
+            number: '６.',
             title: 'きみの隣で、続きを',
-            hint: 'いくつかの思い出を集めたあと、特別な付箋に想いを託してみよう。',
+            hint: 'いくつかの思い出を集めたあと、特別な付箋に想いを託してみてください。',
             keyUnlockable: false
         },
         {
             id: 'grand',
             number: '',
-            title: 'また明日、十五日目',
+            title: 'また明日、１５日目',
             hint: '',
             keyUnlockable: false
         }
@@ -1166,7 +1143,7 @@
 
         pendingUnlockEndingID = eid;
         document.getElementById('ending-unlock-modal-text').innerText =
-            `思い出の鍵を1つ使って\n「${end.number} ${end.title}」を解放しますか？`;
+            `思い出の鍵を１つ使って\n「${end.number} ${end.title}」を解放しますか？`;
         document.getElementById('ending-unlock-modal').style.display = 'flex';
     }
 
@@ -1317,13 +1294,10 @@
         const grid = document.getElementById('coll-grid'); grid.innerHTML = '';
         let all = JSON.parse(localStorage.getItem('lib_vFinal_S') || "[]");
 
-        // 旧仕様で保存されたPROLOGUEの固定進行ボタンを除去
         all = all.filter(n => n.d !== 0);
 
-        // 旧仕様で裏面が空白のDAY14付箋を、現在のシナリオ内容から補完
         all = repairLegacyDay14Notes(all);
 
-        // 除去後の状態を保存し直す
         localStorage.setItem('lib_vFinal_S', JSON.stringify(all));
 
         if (all.length === 0) grid.innerHTML = '<div style="grid-column: 1/-1; padding: 20px; color: #666;">記録がありません。</div>';
