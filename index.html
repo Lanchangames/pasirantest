@@ -407,6 +407,7 @@
     <div id="collection" class="screen">
         <h2>付箋コレクション</h2>
         <div class="sub-text">付箋をクリックして裏返すと、パーシヴァルの反応を確認できます。</div>
+        <div id="collection-completion" style="width:100%; text-align:right; margin-bottom:10px; color:#aaa; font-size:0.9rem;">コンプ率：0%</div>
         
         <div id="coll-grid" class="coll-grid"></div>
         
@@ -1290,6 +1291,37 @@
         });
     }
 
+    function getAllCollectibleNoteTexts() {
+        const noteTexts = new Set();
+
+        const collect = data => {
+            if (!data) return;
+
+            Object.keys(data).forEach(key => {
+                const d = Number(key);
+                if (d === 0) return;
+
+                const options = data[key] && Array.isArray(data[key].o) ? data[key].o : [];
+                options.forEach(o => {
+                    if (o && typeof o.t === 'string') noteTexts.add(o.t);
+                });
+            });
+        };
+
+        collect(typeof scenarios !== 'undefined' ? scenarios : null);
+        collect(typeof warScenarios !== 'undefined' ? warScenarios : null);
+
+        [
+            "『お前とこうして話す時間、好きだよ』",
+            "『お前が相棒でよかったと思ってる』",
+            "『このやり取りが終わるの、少し寂しい』",
+            "『任務が終わっても、こうして話していたい』",
+            "『明日からも、お前とこうして話していたい』"
+        ].forEach(t => noteTexts.add(t));
+
+        return noteTexts;
+    }
+
     function showCollection() {
         const grid = document.getElementById('coll-grid'); grid.innerHTML = '';
         let all = JSON.parse(localStorage.getItem('lib_vFinal_S') || "[]");
@@ -1299,6 +1331,14 @@
         all = repairLegacyDay14Notes(all);
 
         localStorage.setItem('lib_vFinal_S', JSON.stringify(all));
+
+        const collectibleNotes = getAllCollectibleNoteTexts();
+        const collectedNotes = new Set(all.map(n => n.t).filter(t => collectibleNotes.has(t)));
+        const completionRate = collectibleNotes.size > 0
+            ? Math.round((collectedNotes.size / collectibleNotes.size) * 100)
+            : 0;
+
+        document.getElementById('collection-completion').innerText = `コンプ率：${completionRate}%`;
 
         if (all.length === 0) grid.innerHTML = '<div style="grid-column: 1/-1; padding: 20px; color: #666;">記録がありません。</div>';
         else {
