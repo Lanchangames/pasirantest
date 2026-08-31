@@ -641,29 +641,30 @@
             day >= 10 &&
             day < 14 &&
             affection >= 90 &&
-            getSeenBadgeCount() >= 2
+            getSeenBadgeCount() >= 1
         ) {
             const golds = {
                 10: {
-                    t: "『お前とこうして話す時間、好きだよ』",
+                    t: "『お前と話す時間がすごく楽しい』",
                     c: 'true',
-                    r: "二枚の付箋が風もないのに隣り合う。赤い付箋には『俺も好きだが？　お前が今さら何を驚いている』。紙を手に取ると、ほんの少しだけ暖かい。"
+                    r: "日誌に、『俺もお前と話す時間は楽しく思っている。何かあれば遠慮なくお前からも声をかけろ』と書いてあった。"
                 },
                 11: {
-                    t: "『お前が相棒でよかったと思ってる』",
+                    t: "『なんで怪我してるって気が付いたんだ？』",
                     c: 'true',
-                    r: "付箋の上に氷と炎の小さな紋様が並んで浮かぶ。赤い付箋には『俺もだ。お前だからここまで任せられる』と、迷いのない字で書かれている。"
+                    r: "『いつもお前の仕草には気を配っている。今回だけではない、無理をするのはやめろ』と書かれていた。"
                 },
                 12: {
-                    t: "『このやり取りが終わるの、少し寂しい』",
+                    t: "『任務が終わってもたまにこういうやり取りがしたいな』",
                     c: 'true',
-                    r: "付箋の端がなかなか机から剥がれない。赤い付箋には『……俺もだ。なら、任務が終わったからといって終わらせる必要もないだろう』と書かれている。"
+                    r: "赤い付箋に、『その魔法の付箋の力が本物なら、これからもそのような機会があるはずだな。楽しみにしている』と書いてある。"
                 },
                 13: {
-                    t: "『任務が終わっても、こうして話していたい』",
+                    t: "『明後日、誘ってくれて嬉しい』",
                     c: 'true',
-                    r: "二枚の付箋が並んだまま、しっかり机に貼り付いている。赤い付箋には『ならばそうすればいい。付箋でなくても構わん。俺もお前と話していたい』と書かれている。"
-                }
+                    r: "『俺もお前が頷いてくれて嬉しく思う。資料を見つけた時、お前と検討できると思うと胸が躍った』と書かれた赤い付箋が貼られている。"
+                },
+               
             };
 
             opts.push(golds[day]);
@@ -675,9 +676,9 @@
             scores.true >= 1
         ) {
             opts.push({
-                t: "『明日からも、お前とこうして話していたい』",
+                t: "『大好きだ、パーシヴァル』",
                 c: 'true',
-                r: "付箋の裏には、後から書き足された赤い文字がある。『明日だけの話にするな、ランスロット。話したい時は来い。俺もお前に会いに行く』。"
+                r: "知っている。俺も愛している。これから先、どんなことがあっても……"
             });
         }
 
@@ -715,35 +716,33 @@
             });
         }
 
-        if (day === 14) {
-            let all = JSON.parse(localStorage.getItem('lib_vFinal_S') || "[]");
-
-            const finalNote = {
-                d: day,
-                t: o.t,
-                c: o.c,
-                r: o.r
-            };
-
-            const index = all.findIndex(x => x.t === finalNote.t);
-
-            if (index >= 0) {
-                all[index] = finalNote;
-            } else {
-                all.push(finalNote);
+            if (day === 14) {
+                let all = JSON.parse(localStorage.getItem('lib_vFinal_S') || "[]");
+            
+                const finalNote = {
+                    d: day,
+                    t: o.t,
+                    c: o.c,
+                    r: o.r
+                };
+            
+                const index = all.findIndex(x => x.t === finalNote.t);
+            
+                if (index >= 0) {
+                    all[index] = finalNote;
+                } else {
+                    all.push(finalNote);
+                }
+            
+                localStorage.setItem('lib_vFinal_S', JSON.stringify(all));
+            
+                day = 15;
+                document.getElementById('ui-panel').style.display = 'flex';
+                document.getElementById('choice-area').innerHTML =
+                    '<button class="btn" style="border-color:#d4af37; color:#d4af37;" onclick="prepareEpilogue()">エンディングへ</button>';
+            
+                return;
             }
-
-            localStorage.setItem('lib_vFinal_S', JSON.stringify(all));
-
-            setTimeout(() => {
-                isFinalDayReply = true;
-                textBuffer = [o.r];
-                textIdx = 0;
-                document.getElementById('text-box').innerHTML = "";
-                advance();
-            }, 150);
-            return;
-        }
 
         setTimeout(() => {
             day++;
@@ -1233,66 +1232,6 @@
     function openExtra() { document.getElementById('intro').style.display = 'none'; document.getElementById('extra').style.display = 'flex'; }
     function closeExtra() { document.getElementById('extra').style.display = 'none'; document.getElementById('intro').style.display = 'flex'; }
 
-    function repairLegacyDay14Notes(all) {
-        const candidates = [];
-
-        if (typeof scenarios !== 'undefined' &&
-            scenarios[14] &&
-            Array.isArray(scenarios[14].o)) {
-            candidates.push(...scenarios[14].o);
-        }
-
-        if (typeof warScenarios !== 'undefined' &&
-            warScenarios[14] &&
-            Array.isArray(warScenarios[14].o)) {
-            candidates.push(...warScenarios[14].o);
-        }
-
-        candidates.push(
-            {
-                t: "『明日からも、お前とこうして話していたい』",
-                c: 'true',
-                r: "付箋の裏には、後から書き足された赤い文字がある。『明日だけの話にするな、ランスロット。話したい時は来い。俺もお前に会いに行く』。"
-            },
-            {
-                t: "最後の付箋をめくる",
-                c: 'grand',
-                r: "裏面には、見覚えのある赤い字で追伸が残されている。『見つけたな、ランスロット。次からは隠さず渡す。お前も、消さずに書け』。"
-            },
-            {
-                t: "『これからも、俺のことちゃんと見てて』",
-                c: 'rival',
-                r: "付箋の裏には『言われなくても見る。勝負があろうとなかろうと、お前が何をするかくらいな』と書かれている。"
-            },
-            {
-                t: "『これからも、本気で俺のこと見てて』",
-                c: 'rival',
-                r: "付箋の裏には『ああ。勝負があろうとなかろうと、お前が何をするかくらい見ている』と書かれている。"
-            }
-        );
-
-        return all.map(n => {
-            if (
-                n.d !== 14 ||
-                (typeof n.r === 'string' && n.r.trim() !== '')
-            ) {
-                return n;
-            }
-
-            const found = candidates.find(o => o.t === n.t);
-
-            if (!found) {
-                return n;
-            }
-
-            return {
-                ...n,
-                c: n.c || found.c,
-                r: found.r
-            };
-        });
-    }
-
     function getAllCollectibleNoteTexts() {
         const noteTexts = new Set();
 
@@ -1312,25 +1251,23 @@
 
         collect(typeof scenarios !== 'undefined' ? scenarios : null);
         collect(typeof warScenarios !== 'undefined' ? warScenarios : null);
-
+        
         [
-            "『お前とこうして話す時間、好きだよ』",
-            "『お前が相棒でよかったと思ってる』",
-            "『このやり取りが終わるの、少し寂しい』",
-            "『任務が終わっても、こうして話していたい』",
-            "『明日からも、お前とこうして話していたい』"
+            "『お前と話す時間がすごく楽しい』",
+            "『なんで怪我してるって気が付いたんだ？』",
+            "『任務が終わってもたまにこういうやり取りがしたいな』",
+            "『明後日、誘ってくれて嬉しい』",
+            "『大好きだ、パーシヴァル』"
         ].forEach(t => noteTexts.add(t));
-
+        
         return noteTexts;
-    }
+            }
 
     function showCollection() {
         const grid = document.getElementById('coll-grid'); grid.innerHTML = '';
         let all = JSON.parse(localStorage.getItem('lib_vFinal_S') || "[]");
 
         all = all.filter(n => n.d !== 0);
-
-        all = repairLegacyDay14Notes(all);
 
         localStorage.setItem('lib_vFinal_S', JSON.stringify(all));
 
