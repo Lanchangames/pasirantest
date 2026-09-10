@@ -43,6 +43,7 @@
             z-index: 100; padding: 40px 20px; box-sizing: border-box; 
         }
         #intro { z-index: 1000; }
+        #intro.grand-ready { background: #2b3854; }
         #game { display: none; }
 
         #intro img { max-width: 600px; margin-bottom: 40px; opacity: 0.9; }
@@ -93,12 +94,12 @@
         
         #text-box { 
             font-size: 1rem; line-height: 2.1; text-align: left; 
-            height: 100%; 
+            height: calc(100% - 32px); 
             white-space: pre-wrap; 
             overflow-y: auto;
             overflow-x: hidden;
             padding-right: 8px;
-            padding-bottom: 36px;
+            padding-bottom: 8px;
             box-sizing: border-box;
             overscroll-behavior: contain;
             position: relative;
@@ -110,13 +111,12 @@
             left: 0;
             right: 0;
             bottom: 0;
-            height: 70px;
+            height: 32px;
             display: flex;
-            align-items: flex-end;
+            align-items: center;
             justify-content: center;
-            padding-bottom: 9px;
             box-sizing: border-box;
-            background: linear-gradient(to bottom, rgba(244,241,234,0), rgba(244,241,234,0.92) 68%, rgba(244,241,234,0.98));
+            background: linear-gradient(to bottom, rgba(244,241,234,0.08), rgba(244,241,234,0.94));
             color: rgba(70,70,70,0.42);
             font-family: sans-serif;
             font-size: 0.9rem;
@@ -386,7 +386,7 @@
         </p>
         <div style="display:flex; flex-direction: column; gap:15px; align-items: center; width: 100%;">
             <button class="title-note-btn" onclick="initAudio(); startPrologue();">物語をはじめる</button>
-            <button id="grand-home-btn" class="title-note-btn" onclick="initAudio(); startGrandFinale();" style="display:none; background-color:var(--note-gold); border:1px solid #d4af37;">15日目へ</button>
+            <button id="grand-home-btn" class="title-note-btn" onclick="initAudio(); startGrandFinale();" style="display:none; background-color:var(--note-gold); border:1px solid #d4af37;">1年後……</button>
             <button class="title-note-btn" onclick="openMemories();">思い出</button>
             <button class="title-note-btn" onclick="openExtra();">Infomation</button>
         </div>
@@ -398,7 +398,7 @@
             <div class="paper">
                 <div id="text-box"></div>
                 <div id="scroll-hint" aria-hidden="true">∨</div>
-                <div id="click-prompt">next ›</div>
+                                <div id="click-prompt">next ›</div>
             </div>
         </div>
         
@@ -434,6 +434,7 @@
 
         <div style="display:flex; gap:15px; margin-top:50px; width: 100%; justify-content:center;">
             <button class="btn" onclick="closeEndingCollection();" style="max-width: 150px;">BACK</button>
+            <button class="btn" onclick="goToStart();" style="max-width: 150px;">スタート画面へ</button>
         </div>
     </div>
 
@@ -453,6 +454,7 @@
 
         <div style="display:flex; gap:15px; margin-top:20px; width: 100%; justify-content:center;">
             <button class="btn" onclick="closeEndingViewer();" style="max-width: 150px;">BACK</button>
+            <button class="btn" onclick="goToStart();" style="max-width: 150px;">スタート画面へ</button>
         </div>
     </div>
 
@@ -465,6 +467,7 @@
         
         <div style="display:flex; gap:15px; margin-top:50px; width: 100%; justify-content:center;">
             <button class="btn" onclick="closeCollection();" style="max-width: 150px;">BACK</button>
+            <button class="btn" onclick="goToStart();" style="max-width: 150px;">スタート画面へ</button>
         </div>
     </div>
 
@@ -794,7 +797,6 @@
             area.appendChild(b);
         });
     }
-
     function selectChoice(o) {
         if (choiceMade) return;
         choiceMade = true;
@@ -948,8 +950,11 @@
 
     function updateGrandHomeButton() {
         const button = document.getElementById('grand-home-btn');
+        const intro = document.getElementById('intro');
         if (!button) return;
-        button.style.display = hasUnlockedAllNonGrandEndings() ? 'block' : 'none';
+        const grandReady = hasUnlockedAllNonGrandEndings();
+        button.style.display = grandReady ? 'block' : 'none';
+        if (intro) intro.classList.toggle('grand-ready', grandReady);
     }
 
     function startGrandFinale() {
@@ -1192,7 +1197,7 @@
             } else {
                 const hint = document.createElement('div');
                 hint.style.fontSize = '0.9rem';
-                hint.style.color = '#aaa';
+                                hint.style.color = '#aaa';
                 hint.style.lineHeight = '1.8';
                 hint.style.marginBottom = '12px';
                 hint.innerText = `Hint：${end.hint}`;
@@ -1314,6 +1319,18 @@
         document.getElementById('ending-viewer').style.display = 'none';
         document.getElementById('ending-collection').style.display = 'flex';
         showEndingCollection();
+    }
+
+    function goToStart() {
+        document.getElementById('game').style.display = 'none';
+        document.getElementById('memories').style.display = 'none';
+        document.getElementById('ending-collection').style.display = 'none';
+        document.getElementById('ending-viewer').style.display = 'none';
+        document.getElementById('collection').style.display = 'none';
+        document.getElementById('extra').style.display = 'none';
+        document.getElementById('ending-unlock-modal').style.display = 'none';
+        updateGrandHomeButton();
+        document.getElementById('intro').style.display = 'flex';
     }
 
     function openCollection() { 
