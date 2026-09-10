@@ -48,14 +48,24 @@
         #intro img { max-width: 600px; margin-bottom: 40px; opacity: 0.9; }
         #intro p { max-width: 600px; line-height: 2; font-size: 0.95rem; margin-bottom: 50px; color: #aaa; }
 
-        #day-overlay { position: fixed; inset: 0; background: var(--bg-dark); z-index: 5000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.6s ease; }
+        #day-overlay { position: fixed; inset: 0; background: var(--bg-dark); z-index: 5000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.35s ease; }
         #day-overlay.active { opacity: 1; pointer-events: auto; }
         #day-overlay-text { font-family: 'Shippori Mincho', serif; font-size: 1.5rem; color: #888; letter-spacing: 0.2em; font-weight: normal; }
+        #day-overlay.active #day-overlay-text { animation: ink-reveal 0.5s ease-out both; }
+        #day-overlay.war-day #day-overlay-text { color: #a94f4f; text-shadow: 0 0 10px rgba(169,79,79,0.18); }
+
+        @keyframes ink-reveal {
+            0% { opacity: 0; filter: blur(4px); letter-spacing: 0.28em; text-shadow: 0 0 7px currentColor; }
+            55% { opacity: 0.78; filter: blur(1.2px); text-shadow: 0 0 3px currentColor; }
+            100% { opacity: 1; filter: blur(0); letter-spacing: 0.2em; text-shadow: 0 0 0 transparent; }
+        }
 
         #day-label {
             width: 100%; max-width: 700px; text-align: left;
             font-size: 1.1rem; color: #888; margin-bottom: 10px; letter-spacing: 0.1em;
+            transition: color 0.25s ease;
         }
+        #day-label.war-day { color: #a94f4f; }
 
         .desk { 
             width: 100%; max-width: 700px; 
@@ -65,7 +75,12 @@
         .paper { 
             width: 100%; 
             height: 400px; 
-            background: var(--paper); 
+            background:
+                radial-gradient(circle at 18% 24%, rgba(80,68,48,0.018) 0 1px, transparent 1.6px),
+                radial-gradient(circle at 76% 68%, rgba(255,255,255,0.22) 0 1px, transparent 1.8px),
+                linear-gradient(90deg, rgba(82,68,45,0.012), rgba(255,255,255,0.028) 48%, rgba(82,68,45,0.01)),
+                var(--paper);
+            background-size: 23px 29px, 31px 37px, auto, auto;
             color: var(--text-paper); 
             padding: 40px 50px; 
             position: relative; 
@@ -77,9 +92,45 @@
         }
         
         #text-box { 
-            font-size: 1.1rem; line-height: 2.2; text-align: left; 
+            font-size: 1rem; line-height: 2.1; text-align: left; 
             height: 100%; 
             white-space: pre-wrap; 
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 8px;
+            padding-bottom: 36px;
+            box-sizing: border-box;
+            overscroll-behavior: contain;
+            position: relative;
+            z-index: 1;
+        }
+
+        #scroll-hint {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 70px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 9px;
+            box-sizing: border-box;
+            background: linear-gradient(to bottom, rgba(244,241,234,0), rgba(244,241,234,0.92) 68%, rgba(244,241,234,0.98));
+            color: rgba(70,70,70,0.42);
+            font-family: sans-serif;
+            font-size: 0.9rem;
+            line-height: 1;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        #scroll-hint.visible {
+            opacity: 1;
+            visibility: visible;
         }
         
         #click-prompt { 
@@ -346,6 +397,7 @@
         <div class="desk" id="desk-trigger">
             <div class="paper">
                 <div id="text-box"></div>
+                <div id="scroll-hint" aria-hidden="true">∨</div>
                 <div id="click-prompt">next ›</div>
             </div>
         </div>
@@ -445,12 +497,39 @@
     
     function playPageSound() {
         if(!audioCtx) return;
-        const gain = audioCtx.createGain(); gain.gain.value = 0.02;
-        const osc = audioCtx.createOscillator(); osc.type = 'sine';
-        osc.frequency.setValueAtTime(300, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+
+        const now = audioCtx.currentTime;
+        const duration = 0.14;
+        const frameCount = Math.floor(audioCtx.sampleRate * duration);
+        const buffer = audioCtx.createBuffer(1, frameCount, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+
+        for (let i = 0; i < frameCount; i++) {
+            const progress = i / frameCount;
+            const envelope = Math.pow(1 - progress, 1.8);
+            data[i] = (Math.random() * 2 - 1) * envelope;
+        }
+
+        const source = audioCtx.createBufferSource();
+        const filter = audioCtx.createBiquadFilter();
+        const gain = audioCtx.createGain();
+
+        source.buffer = buffer;
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(900, now);
+        filter.frequency.exponentialRampToValueAtTime(2600, now + duration);
+        filter.Q.value = 0.7;
+
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.035, now + 0.012);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+        source.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        source.start(now);
+        source.stop(now + duration);
     }
 
     let day = 0;
@@ -485,7 +564,10 @@
         document.getElementById('text-box').innerHTML = "";
         
         const dayStr = day === 0 ? "PROLOGUE" : `DAY ${String(day).padStart(2, '0')}`;
-        document.getElementById('day-label').innerText = dayStr;
+        const isWarDay = day >= 8 && (isPrankWar || (day === 8 && scores.rival === 7));
+        const dayLabel = document.getElementById('day-label');
+        dayLabel.innerText = dayStr;
+        dayLabel.classList.toggle('war-day', isWarDay);
 
         showDayOverlay(dayStr, () => {
             if (day === 8 && (scores.rival === 7)) isPrankWar = true; 
@@ -498,12 +580,13 @@
             textIdx = 0;
             isDayTransitioning = false;
             advance();
-        });
+        }, isWarDay);
     }
 
-    function showDayOverlay(text, cb) {
+    function showDayOverlay(text, cb, isWarDay = false) {
         const ov = document.getElementById('day-overlay');
         document.getElementById('day-overlay-text').innerText = text;
+        ov.classList.toggle('war-day', isWarDay);
         
         ov.classList.add('active');
         
@@ -512,9 +595,9 @@
             
             setTimeout(() => {
                 if (cb) cb();
-            }, 600);
+            }, 350);
             
-        }, 1200);
+        }, 900);
     }
 
     async function advance() {
@@ -601,6 +684,19 @@
         };
     }
 
+    function updateScrollHint() {
+        const box = document.getElementById('text-box');
+        const hint = document.getElementById('scroll-hint');
+        if (!box || !hint) return;
+
+        const canScroll = box.scrollHeight > box.clientHeight + 2;
+        const atBottom = box.scrollTop + box.clientHeight >= box.scrollHeight - 2;
+        hint.classList.toggle('visible', canScroll && !atBottom);
+    }
+
+    document.getElementById('text-box').addEventListener('scroll', updateScrollHint);
+    window.addEventListener('resize', updateScrollHint);
+
     async function typeLine(line) {
         isTyping = true;
         skipRequested = false;
@@ -609,6 +705,8 @@
 
         const box = document.getElementById('text-box');
         box.innerHTML = "";
+        box.scrollTop = 0;
+        updateScrollHint();
 
         playPageSound();
 
@@ -622,10 +720,11 @@
             await new Promise(r => setTimeout(r, 15));
         }
 
+        updateScrollHint();
         isTyping = false;
         skipRequested = false;
     }
-　　　　　document.getElementById('desk-trigger').onpointerdown = () => {
+　　　　　document.getElementById('desk-trigger').onclick = () => {
     
         if((!choiceMade || isEndingMode || isFinalDayReply) && document.getElementById('ui-panel').style.display !== 'flex') advance();
     };
