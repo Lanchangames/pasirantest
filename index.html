@@ -28,6 +28,12 @@
             --note-self: #f8e1e1;
             --note-rival: #ede4f5;  
             --note-gold: #fcf4cb;
+
+            --mark-prank: #2980b9;
+            --mark-care: #4f8a3d;
+            --mark-self: #c6535f;
+            --mark-rival: #7653a6;
+            --mark-gold: #c49a18;
         }
         
         body { 
@@ -48,11 +54,20 @@
             z-index: 100; padding: 40px 20px; box-sizing: border-box; 
         }
         #intro { z-index: 1000; }
+        #intro.hint-mode { background: #171a21; }
         #intro.grand-ready { background: #2b3854; }
         #game { display: none; }
 
         #intro img { max-width: 600px; margin-bottom: 40px; opacity: 0.9; }
         #intro p { max-width: 600px; line-height: 2; font-size: 0.95rem; margin-bottom: 50px; color: #aaa; }
+
+        #hint-mode-notice {
+            display: none;
+            margin-top: 24px;
+            color: #bbb;
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+        }
 
         #day-overlay { position: fixed; inset: 0; background: var(--bg-dark); z-index: 5000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.35s ease; }
         #day-overlay.active { opacity: 1; pointer-events: auto; }
@@ -238,9 +253,11 @@
             position: absolute;
             right: 10px;
             bottom: 10px;
-            width: 9px;
-            height: 9px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
+            border: 1px solid rgba(0,0,0,0.35);
+            box-sizing: border-box;
             pointer-events: none;
         }
 
@@ -416,6 +433,7 @@
             <button class="title-note-btn" onclick="openMemories();">思い出</button>
             <button class="title-note-btn" onclick="openExtra();">Infomation</button>
         </div>
+        <div id="hint-mode-notice">付箋に色がつきました</div>
     </div>
 
     <div id="game" class="screen">
@@ -838,11 +856,11 @@
                 mark.className = 'choice-category-mark';
 
                 const markColor =
-                    o.c === 'prank' ? 'var(--note-prank)' :
-                    o.c === 'care' ? 'var(--note-care)' :
-                    o.c === 'self' ? 'var(--note-self)' :
-                    o.c === 'rival' ? 'var(--note-rival)' :
-                    'var(--note-gold)';
+                    o.c === 'prank' ? 'var(--mark-prank)' :
+                    o.c === 'care' ? 'var(--mark-care)' :
+                    o.c === 'self' ? 'var(--mark-self)' :
+                    o.c === 'rival' ? 'var(--mark-rival)' :
+                    'var(--mark-gold)';
 
                 mark.style.backgroundColor = markColor;
                 b.appendChild(mark);
@@ -1006,10 +1024,23 @@
     function updateGrandHomeButton() {
         const button = document.getElementById('grand-home-btn');
         const intro = document.getElementById('intro');
+        const hintModeNotice = document.getElementById('hint-mode-notice');
         if (!button) return;
+
+        const played = getPlayedEndings();
+        const hintMode = played.true_love;
         const grandReady = hasUnlockedAllNonGrandEndings();
+
         button.style.display = grandReady ? 'block' : 'none';
-        if (intro) intro.classList.toggle('grand-ready', grandReady);
+
+        if (intro) {
+            intro.classList.toggle('hint-mode', hintMode);
+            intro.classList.toggle('grand-ready', grandReady);
+        }
+
+        if (hintModeNotice) {
+            hintModeNotice.style.display = hintMode ? 'block' : 'none';
+        }
     }
 
     function startGrandFinale() {
