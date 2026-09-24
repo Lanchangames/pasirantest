@@ -229,9 +229,20 @@
             transform: rotate(-1deg); 
             opacity: 0; 
             animation: note-appear 0.4s forwards ease-out;
+            position: relative;
         }
         .sticky-note:nth-child(even) { transform: rotate(1deg); }
         .sticky-note:hover { transform: scale(1.02) rotate(0deg); box-shadow: 2px 6px 12px rgba(0,0,0,0.3); }
+
+        .choice-category-mark {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            pointer-events: none;
+        }
 
         @keyframes note-appear {
             0% { opacity: 0; transform: translateY(-5px) rotate(0deg); }
@@ -809,6 +820,9 @@
             });
         }
 
+        const playedEndings = getPlayedEndings();
+        const showCategoryMarks = playedEndings.true_love;
+
         opts.forEach(o => {
             const b = document.createElement('button');
             if (day === 0) {
@@ -818,6 +832,22 @@
                 b.className = 'sticky-note' + (o.c === 'true' || o.c === 'grand' ? ' gold-choice' : '');
             }
             b.innerText = o.t;
+
+            if (day !== 0 && showCategoryMarks) {
+                const mark = document.createElement('span');
+                mark.className = 'choice-category-mark';
+
+                const markColor =
+                    o.c === 'prank' ? 'var(--note-prank)' :
+                    o.c === 'care' ? 'var(--note-care)' :
+                    o.c === 'self' ? 'var(--note-self)' :
+                    o.c === 'rival' ? 'var(--note-rival)' :
+                    'var(--note-gold)';
+
+                mark.style.backgroundColor = markColor;
+                b.appendChild(mark);
+            }
+
             b.onclick = (e) => { e.stopPropagation(); selectChoice(o); };
             area.appendChild(b);
         });
